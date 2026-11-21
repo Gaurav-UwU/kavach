@@ -12,6 +12,15 @@ import QuickChips from "./QuickChips";
 import InputBar, { type OutgoingMessage } from "./InputBar";
 import FamilyGuardModal from "./FamilyGuardModal";
 import AlertModal, { type AlertPreview } from "./AlertModal";
+import {
+  ChevronDownIcon,
+  DoubleCheckIcon,
+  DotsVerticalIcon,
+  ShieldAvatar,
+  ShieldIcon,
+  TrashIcon,
+  VerifiedBadge,
+} from "./icons";
 
 function newId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -30,7 +39,10 @@ export default function ChatApp() {
   const [guardOpen, setGuardOpen] = useState(false);
   const [alertPreview, setAlertPreview] = useState<AlertPreview | null>(null);
   const [welcomeTime, setWelcomeTime] = useState<number | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showScrollDown, setShowScrollDown] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
 
   const t = STRINGS[language];
 
@@ -46,9 +58,27 @@ export default function ChatApp() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, analyzing]);
 
+  const handleScroll = useCallback(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollDown(distance > 120);
+  }, []);
+
+  const scrollToEnd = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, []);
+
   const handleSaveGuard = useCallback((contact: GuardContact) => {
     setGuard(contact);
     saveGuard(contact);
+  }, []);
+
+  const handleClearChat = useCallback(() => {
+    setMenuOpen(false);
+    stopSpeaking();
+    setMessages([]);
+    setWelcomeTime(Date.now());
   }, []);
 
   const analyze = useCallback(
@@ -137,31 +167,66 @@ export default function ChatApp() {
 
   return (
     <div className="flex min-h-dvh items-stretch justify-center bg-[#0b141a] sm:p-6">
-      <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#ECE5DD] shadow-2xl sm:h-[calc(100dvh-3rem)] sm:rounded-xl">
+      <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-3rem)] sm:rounded-xl">
         {/* Top header */}
-        <header className="flex items-center gap-3 bg-[#075E54] px-3 py-2.5 text-white">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl">
-            🛡️
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1 truncate text-[16px] font-semibold">
+        <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 py-2 text-white">
+          <ShieldAvatar className="h-10 w-10 shrink-0" />
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="flex items-center gap-1.5 text-[17px] font-medium">
               Kavach
-              <span aria-hidden className="text-[#25D366]">✔</span>
+              <VerifiedBadge className="h-[15px] w-[15px]" />
             </p>
-            <p className="text-xs text-white/80">{t.subtitle}</p>
+            <p className="truncate text-[12.5px] text-white/85">
+              {analyzing ? t.typing : t.subtitle}
+            </p>
           </div>
           <button
             type="button"
             onClick={() => setGuardOpen(true)}
             aria-label={t.guardTitle}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-xl transition-colors hover:bg-white/10"
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10"
           >
-            🛡️
+            <ShieldIcon className="h-[22px] w-[22px]" />
           </button>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={t.menuLabel}
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10"
+          >
+            <DotsVerticalIcon className="h-[22px] w-[22px]" />
+          </button>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-2 top-[calc(100%+2px)] z-40 w-60 overflow-hidden rounded-lg bg-white py-1.5 shadow-xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setGuardOpen(true);
+                  }}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[15px] text-[#3B4A54] hover:bg-[#F5F6F6]"
+                >
+                  <ShieldIcon className="h-5 w-5 text-[#54656F]" />
+                  {t.guardSettings}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearChat}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[15px] text-[#3B4A54] hover:bg-[#F5F6F6]"
+                >
+                  <TrashIcon className="h-5 w-5 text-[#54656F]" />
+                  {t.clearChat}
+                </button>
+              </div>
+            </>
+          )}
         </header>
 
         {/* Language switcher */}
-        <div className="flex items-center gap-1.5 bg-[#128C7E] px-3 py-1.5">
+        <div className="z-20 flex items-center gap-1.5 bg-[#128C7E] px-3 py-1.5">
           {LANGUAGES.map((lang) => (
             <button
               key={lang}
@@ -179,31 +244,46 @@ export default function ChatApp() {
         </div>
 
         {/* Chat canvas */}
-        <main className="chat-pattern flex-1 space-y-2 overflow-y-auto px-3 py-3">
+        <main
+          ref={mainRef}
+          onScroll={handleScroll}
+          className="chat-pattern relative flex-1 space-y-2 overflow-y-auto px-3 py-3"
+        >
+          {/* Date chip */}
+          <div className="flex justify-center pb-1">
+            <span className="rounded-md bg-white px-2.5 py-1 text-[12px] font-medium text-[#54656F] shadow-sm">
+              {t.today}
+            </span>
+          </div>
+
+          {/* Encryption-style notice */}
+          <p className="mx-auto max-w-[92%] rounded-lg bg-[#FCF4CB] px-3 py-2 text-center text-[12.5px] leading-snug text-[#54656F] shadow-sm">
+            {t.encryption}
+          </p>
+
           {/* Welcome bubble */}
           <div className="flex">
-            <div className="max-w-[90%] rounded-lg rounded-tl-none bg-white px-3 py-2 text-[16px] leading-relaxed text-gray-900 shadow-sm">
-              <p>
+            <div className="wa-in wa-bubble max-w-[90%] rounded-lg rounded-tl-none bg-white px-2.5 py-1.5 shadow-sm">
+              <p className="text-[16px] leading-relaxed text-gray-900">
                 <span className="font-semibold text-[#075E54]">Kavach:</span> {t.welcome}
               </p>
-              <p className="mt-1.5 text-right text-[11px] text-gray-400">
+              <p className="mt-0.5 text-right text-[11px] text-[#8696A0]">
                 {welcomeTime !== null && formatTime(welcomeTime)}
               </p>
             </div>
           </div>
-          <p className="px-1 text-center text-[11px] text-gray-500">{t.disclaimer}</p>
 
           {messages.map((message) => {
             if (message.role === "user") {
               return (
                 <div key={message.id} className="flex justify-end">
-                  <div className="max-w-[85%] rounded-lg rounded-tr-none bg-[#DCF8C6] px-3 py-2 shadow-sm">
+                  <div className="wa-out wa-bubble max-w-[85%] rounded-lg rounded-tr-none bg-[#D9FDD3] px-2.5 py-1.5 shadow-sm">
                     {message.image && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={message.image}
                         alt=""
-                        className="mb-1.5 max-h-44 w-full rounded-md object-cover"
+                        className="mb-1.5 w-full max-h-44 rounded-md object-cover"
                       />
                     )}
                     {message.text && (
@@ -211,8 +291,9 @@ export default function ChatApp() {
                         {message.text}
                       </p>
                     )}
-                    <p className="mt-0.5 text-right text-[11px] text-gray-500">
+                    <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
                       {formatTime(message.createdAt)}
+                      <DoubleCheckIcon className="h-3 w-[18px]" />
                     </p>
                   </div>
                 </div>
@@ -222,7 +303,7 @@ export default function ChatApp() {
             if (message.role === "kavach") {
               return (
                 <div key={message.id} className="flex">
-                  <div className="max-w-[94%] rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
+                  <div className="wa-in wa-bubble max-w-[94%] rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
                     <VerdictCard
                       analysis={message.analysis}
                       lang={message.lang}
@@ -230,7 +311,7 @@ export default function ChatApp() {
                       guard={guard ?? loadGuard()}
                       onFixGuard={() => setGuardOpen(true)}
                     />
-                    <p className="mt-1.5 text-right text-[11px] text-gray-400">
+                    <p className="mt-1.5 text-right text-[11px] text-[#8696A0]">
                       {formatTime(message.createdAt)}
                     </p>
                   </div>
@@ -240,11 +321,11 @@ export default function ChatApp() {
 
             if (message.role === "banner") {
               return (
-                <div key={message.id} className="flex justify-center py-1">
+                <div key={message.id} className="wa-bubble flex justify-center py-1">
                   <button
                     type="button"
                     onClick={() => openAlert(message.name, message.relation, message.summary)}
-                    className="rounded-full border border-[#075E54]/30 bg-[#E7FFDB] px-3 py-1.5 text-[13px] font-medium text-[#075E54] shadow-sm transition-colors hover:bg-[#d8f5c8]"
+                    className="rounded-full border border-[#075E54]/25 bg-[#E7FFDB] px-3 py-1.5 text-[13px] font-medium text-[#075E54] shadow-sm transition-colors hover:bg-[#d8f5c8]"
                   >
                     🛡️ {t.banner(message.name, message.relation)} —{" "}
                     <span className="font-bold underline">{t.viewAlert}</span>
@@ -255,7 +336,7 @@ export default function ChatApp() {
 
             return (
               <div key={message.id} className="flex">
-                <div className="rounded-lg bg-red-50 px-3 py-2 text-[15px] text-red-700 shadow-sm">
+                <div className="wa-bubble rounded-lg bg-[#FFE0DE] px-3 py-2 text-[15px] text-[#8B2F28] shadow-sm">
                   ⚠️ {message.text}
                 </div>
               </div>
@@ -264,8 +345,8 @@ export default function ChatApp() {
 
           {analyzing && (
             <div className="flex">
-              <div className="rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
-                <p className="flex items-center gap-2 text-[15px] text-gray-600">
+              <div className="wa-in wa-bubble rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
+                <p className="flex items-center gap-2 text-[15px] text-[#667781]">
                   {t.analyzing}
                   <span className="flex gap-1">
                     <span className="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-[#25D366] [animation-delay:0ms]" />
@@ -277,6 +358,18 @@ export default function ChatApp() {
             </div>
           )}
           <div ref={bottomRef} />
+
+          {/* Scroll-to-bottom FAB */}
+          {showScrollDown && (
+            <button
+              type="button"
+              onClick={scrollToEnd}
+              aria-label="Scroll to latest"
+              className="sticky bottom-1 ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#54656F] shadow-lg"
+            >
+              <ChevronDownIcon className="h-6 w-6" />
+            </button>
+          )}
         </main>
 
         <QuickChips language={language} disabled={analyzing} onPick={handlePickSample} />

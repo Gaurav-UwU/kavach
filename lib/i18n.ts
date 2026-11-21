@@ -12,6 +12,14 @@ export interface Strings {
   chipsTitle: string;
   inputPlaceholder: string;
   analyzing: string;
+  today: string;
+  encryption: string;
+  typing: string;
+  listening: string;
+  voiceUnsupported: string;
+  menuLabel: string;
+  guardSettings: string;
+  clearChat: string;
   why: string;
   doNow: string;
   listen: string;
@@ -53,6 +61,15 @@ export const STRINGS: Record<Language, Strings> = {
     chipsTitle: "Forward a sample message",
     inputPlaceholder: "Paste suspicious message...",
     analyzing: "Kavach is checking this message…",
+    today: "TODAY",
+    encryption:
+      "🔒 Messages in this demo never leave your phone. Only the text you send for checking is analyzed.",
+    typing: "typing…",
+    listening: "Listening…",
+    voiceUnsupported: "Voice input is not supported in this browser",
+    menuLabel: "Menu",
+    guardSettings: "Family Guard settings",
+    clearChat: "Clear chat",
     why: "Why?",
     doNow: "What to do now",
     listen: "Listen",
@@ -98,6 +115,15 @@ export const STRINGS: Record<Language, Strings> = {
     chipsTitle: "नमूना संदेश भेजकर देखें",
     inputPlaceholder: "संदिग्ध संदेश यहाँ पेस्ट करें...",
     analyzing: "कवच यह संदेश जाँच रहा है…",
+    today: "आज",
+    encryption:
+      "🔒 इस डेमो चैट के संदेश आपके फ़ोन से बाहर नहीं जाते। सिर्फ़ जाँच के लिए भेजा गया टेक्स्ट ही जाँचा जाता है।",
+    typing: "टाइप कर रहा है…",
+    listening: "सुन रहा हूँ…",
+    voiceUnsupported: "इस ब्राउज़र में वॉइस इनपुट नहीं चलता",
+    menuLabel: "मेनू",
+    guardSettings: "फैमिली गार्ड सेटिंग्स",
+    clearChat: "चैट साफ़ करें",
     why: "क्यों?",
     doNow: "अब क्या करें",
     listen: "सुनें",
@@ -143,6 +169,15 @@ export const STRINGS: Record<Language, Strings> = {
     chipsTitle: "Sample message forward karke dekho",
     inputPlaceholder: "Suspicious message paste karo...",
     analyzing: "Kavach ye message check kar raha hai…",
+    today: "AAJ",
+    encryption:
+      "🔒 Is demo chat ke messages aapke phone se bahar nahi jaate. Sirf check karne bheja gaya text hi analyze hota hai.",
+    typing: "typing…",
+    listening: "Sun raha hoon…",
+    voiceUnsupported: "Is browser mein voice input nahi chalta",
+    menuLabel: "Menu",
+    guardSettings: "Family Guard settings",
+    clearChat: "Chat clear karo",
     why: "Kyun?",
     doNow: "Ab kya karein",
     listen: "Sunaiye",

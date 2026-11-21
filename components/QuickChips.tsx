@@ -23,7 +23,7 @@ export default function QuickChips({ language, disabled, onPick }: QuickChipsPro
             type="button"
             disabled={disabled}
             onClick={() => onPick(sample)}
-            className="shrink-0 rounded-full border border-[#128C7E]/30 bg-white px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-[#075E54] shadow-sm transition-colors hover:bg-[#E7FFDB] disabled:opacity-50"
+            className="shrink-0 rounded-full border border-[#D1D7DB] bg-white px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-[#075E54] shadow-sm transition-colors hover:bg-[#F0F2F5] disabled:opacity-50"
           >
             {sample.emoji} {sample.label}
           </button>
