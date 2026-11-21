@@ -391,7 +391,7 @@ export default function ChatApp() {
         <div aria-hidden className="absolute -left-[15px] top-64 hidden h-14 w-[4px] rounded-l-md bg-[#2f2f31] sm:block" />
         <div aria-hidden className="absolute -right-[15px] top-36 hidden h-20 w-[4px] rounded-r-md bg-[#2f2f31] sm:block" />
 
-        <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-5rem)] sm:max-h-[860px] sm:min-h-[600px] sm:w-[402px] sm:max-w-none sm:rounded-[3rem] sm:border-[12px] sm:border-[#17171a] sm:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.85)]">
+        <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-5rem)] sm:max-h-[844px] sm:w-auto sm:max-w-none sm:aspect-[9/18.5] sm:min-w-[320px] sm:rounded-[2.75rem] sm:border-[10px] sm:border-[#17171a] sm:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.85)]">
           {/* Status bar — part of the desktop phone frame */}
           <div className="relative hidden items-center justify-between bg-[#075E54] px-7 pb-1 pt-2.5 text-[12.5px] font-medium text-white sm:flex">
             <span>{welcomeTime !== null && formatClock(welcomeTime)}</span>
