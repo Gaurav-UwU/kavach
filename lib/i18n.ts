@@ -46,6 +46,7 @@ export interface Strings {
   close: string;
 
   errorGeneric: string;
+  onboardConfirm: string;
   imgTooBig: string;
   imgTypeBad: string;
   removeAttachment: string;
@@ -98,6 +99,8 @@ export const STRINGS: Record<Language, Strings> = {
     close: "Close",
 
     errorGeneric: "Sorry, Kavach could not check this right now. Please try again.",
+    onboardConfirm:
+      "Done! We'll chat in English from now on. 🛡️\nForward any suspicious message — or tap a sample below — and I'll check it for you.",
     imgTooBig: "Image must be under 4 MB",
     imgTypeBad: "Only PNG, JPG or WebP images are supported",
     removeAttachment: "Remove attachment",
@@ -153,6 +156,8 @@ export const STRINGS: Record<Language, Strings> = {
     close: "बंद करें",
 
     errorGeneric: "माफ़ करें, कवच अभी यह जाँच नहीं कर पाया। कृपया फिर कोशिश करें।",
+    onboardConfirm:
+      "हो गया! अब हम हिंदी में बात करेंगे। 🛡️\nकोई भी संदिग्ध संदेश भेजें — या नीचे नमूना आज़माएँ — मैं जाँच कर दूँगा।",
     imgTooBig: "तस्वीर 4 MB से छोटी होनी चाहिए",
     imgTypeBad: "सिर्फ़ PNG, JPG या WebP तस्वीरें चलेंगी",
     removeAttachment: "तस्वीर हटाएँ",
@@ -208,6 +213,8 @@ export const STRINGS: Record<Language, Strings> = {
     close: "बंद करा",
 
     errorGeneric: "क्षमस्व, कवच आत्ता हे तपासू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
+    onboardConfirm:
+      "झाले! आता आपण मराठीत बोलू. 🛡️\nकोणताही संशयास्पद संदेश पाठवा — किंवा खालील नमुना पाहा — मी तपासतो.",
     imgTooBig: "प्रतिमा 4 MB पेक्षा लहान असावी",
     imgTypeBad: "फक्त PNG, JPG किंवा WebP प्रतिमा चालतील",
     removeAttachment: "प्रतिमा काढा",
@@ -263,6 +270,8 @@ export const STRINGS: Record<Language, Strings> = {
     close: "Band karo",
 
     errorGeneric: "Maaf karo, Kavach abhi ye check nahi kar paya. Phir se try karo.",
+    onboardConfirm:
+      "Ho gaya! Ab hum Hinglish mein baat karenge. 🛡️\nKoi bhi suspicious message bhejo — ya neeche sample try karo — main check kar dunga.",
     imgTooBig: "Image 4 MB se chhoti honi chahiye",
     imgTypeBad: "Sirf PNG, JPG ya WebP images chalengi",
     removeAttachment: "Image hatao",

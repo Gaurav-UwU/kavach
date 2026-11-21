@@ -16,6 +16,8 @@ interface InputBarProps {
   onSend: (message: OutgoingMessage) => void;
   /** Shown for attachment / voice validation problems. */
   onNotice: (message: string) => void;
+  /** Overrides the localized placeholder (used pre-language-choice). */
+  placeholderOverride?: string;
 }
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -32,7 +34,7 @@ interface SpeechRecognitionLike {
   onerror: (() => void) | null;
 }
 
-export default function InputBar({ language, disabled, onSend, onNotice }: InputBarProps) {
+export default function InputBar({ language, disabled, onSend, onNotice, placeholderOverride }: InputBarProps) {
   const t = STRINGS[language];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -143,7 +145,7 @@ export default function InputBar({ language, disabled, onSend, onNotice }: Input
                 handleSend();
               }
             }}
-            placeholder={listening ? t.listening : t.inputPlaceholder}
+            placeholder={placeholderOverride ?? (listening ? t.listening : t.inputPlaceholder)}
             className="max-h-28 min-h-9 flex-1 resize-none bg-transparent px-1 py-1.5 text-[16px] text-gray-900 placeholder:text-[#8696A0] focus:outline-none"
           />
           <input

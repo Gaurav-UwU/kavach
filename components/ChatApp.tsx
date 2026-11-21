@@ -12,7 +12,6 @@ import QuickChips from "./QuickChips";
 import InputBar, { type OutgoingMessage } from "./InputBar";
 import FamilyGuardModal from "./FamilyGuardModal";
 import AlertModal, { type AlertPreview } from "./AlertModal";
-import LanguageGate from "./LanguageGate";
 import {
   ChevronDownIcon,
   DoubleCheckIcon,
@@ -33,6 +32,24 @@ function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+const NATIVE_LABEL: Record<Language, string> = {
+  English: "English",
+  Hindi: "हिंदी",
+  Marathi: "मराठी",
+  Hinglish: "Hinglish",
+};
+
+/** Maps a typed onboarding reply ("2", "hindi", "मराठी", …) to a language. */
+function matchLanguageInput(raw: string): Language | null {
+  const s = raw.trim().toLowerCase();
+  if (!s) return null;
+  if (/^4$/.test(s) || /hinglish|हिंग्लिश/.test(s)) return "Hinglish";
+  if (/^3$/.test(s) || /marathi|मराठी/.test(s)) return "Marathi";
+  if (/^2$/.test(s) || /hindi|हिंदी/.test(s)) return "Hindi";
+  if (/^1$/.test(s) || /english/.test(s)) return "English";
+  return null;
+}
+
 export default function ChatApp() {
   const [language, setLanguage] = useState<Language>("English");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -43,32 +60,31 @@ export default function ChatApp() {
   const [welcomeTime, setWelcomeTime] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
-  /** null = still loading prefs; true = show language gate; false = chat */
-  const [gateOpen, setGateOpen] = useState<boolean | null>(null);
+  /** null = still loading prefs; true = language chosen; false = onboarding in chat */
+  const [languageKnown, setLanguageKnown] = useState<boolean | null>(null);
+  /** Onboarding bubbles stay in the conversation after the choice; reappear on reset. */
+  const [onboardVisible, setOnboardVisible] = useState(false);
+  /** Skip the generic welcome bubble in the session right after onboarding. */
+  const [freshOnboard, setFreshOnboard] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
 
   const t = STRINGS[language];
 
-  // Restore saved language (or show the first-run gate) + Family Guard settings.
+  // Restore saved language (or start the in-chat onboarding) + Family Guard settings.
   useEffect(() => {
     const saved = loadSavedLanguage();
     if (saved) {
       setLanguage(saved);
-      setGateOpen(false);
+      setLanguageKnown(true);
+      setOnboardVisible(false);
     } else {
-      setGateOpen(true);
+      setLanguageKnown(false);
+      setOnboardVisible(true);
     }
     setGuard(loadGuard());
     setWelcomeTime(Date.now());
     return () => stopSpeaking();
-  }, []);
-
-  const handleSelectLanguage = useCallback((lang: Language) => {
-    setLanguage(lang);
-    saveLanguage(lang);
-    setWelcomeTime(Date.now());
-    setGateOpen(false);
   }, []);
 
   // Keep the chat scrolled to the newest message.
@@ -108,7 +124,10 @@ export default function ChatApp() {
     setMessages([]);
     setAlertPreview(null);
     setGuardOpen(false);
-    setGateOpen(true);
+    setLanguage("English");
+    setLanguageKnown(false);
+    setOnboardVisible(true);
+    setFreshOnboard(false);
   }, []);
 
   const analyze = useCallback(
@@ -163,8 +182,55 @@ export default function ChatApp() {
     [guard, language],
   );
 
+  /** Records the language choice as a natural chat exchange, then confirms in that language. */
+  const handleLanguageChoice = useCallback((lang: Language, displayText: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: newId(), role: "user", text: displayText, createdAt: Date.now() },
+    ]);
+    setLanguage(lang);
+    saveLanguage(lang);
+    setLanguageKnown(true);
+    setFreshOnboard(true);
+    setMessages((prev) => [
+      ...prev,
+      { id: newId(), role: "kavach-note", text: STRINGS[lang].onboardConfirm, createdAt: Date.now() },
+    ]);
+  }, []);
+
+  /** Handles a typed reply while the language question is still open. */
+  const handleOnboardReply = useCallback(
+    (text: string) => {
+      setMessages((prev) => [
+        ...prev,
+        { id: newId(), role: "user", text, createdAt: Date.now() },
+      ]);
+      const matched = matchLanguageInput(text);
+      if (!matched) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newId(),
+            role: "kavach-note",
+            text: "Please tap or type one: 1️⃣ English · 2️⃣ हिंदी · 3️⃣ मराठी · 4️⃣ Hinglish\n(कृपया एक भाषा चुनें · कृपया एक भाषा निवडा)",
+            createdAt: Date.now(),
+          },
+        ]);
+        return;
+      }
+      handleLanguageChoice(matched, NATIVE_LABEL[matched]);
+    },
+    [handleLanguageChoice],
+  );
+
   const handleSend = useCallback(
     (outgoing: OutgoingMessage) => {
+      // Before a language is chosen, the chat IS the onboarding — typed replies
+      // pick the language instead of being analyzed.
+      if (languageKnown === false) {
+        handleOnboardReply(outgoing.text ?? "");
+        return;
+      }
       setMessages((prev) => [
         ...prev,
         {
@@ -177,7 +243,7 @@ export default function ChatApp() {
       ]);
       void analyze(outgoing);
     },
-    [analyze],
+    [analyze, handleOnboardReply, languageKnown],
   );
 
   const handlePickSample = useCallback(
@@ -198,10 +264,6 @@ export default function ChatApp() {
   return (
     <div className="flex min-h-dvh items-stretch justify-center bg-[#0b141a] sm:p-6">
       <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-3rem)] sm:rounded-xl">
-        {gateOpen === true && <LanguageGate onSelect={handleSelectLanguage} />}
-
-        {gateOpen === false && (
-          <>
         {/* Top header */}
         <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 py-2 text-white">
           <ShieldAvatar className="h-10 w-10 shrink-0" />
@@ -214,6 +276,8 @@ export default function ChatApp() {
               {analyzing ? t.typing : t.subtitle}
             </p>
           </div>
+          {languageKnown === true && (
+            <>
           <button
             type="button"
             onClick={() => setGuardOpen(true)}
@@ -230,6 +294,8 @@ export default function ChatApp() {
           >
             <DotsVerticalIcon className="h-[22px] w-[22px]" />
           </button>
+            </>
+          )}
 
           {menuOpen && (
             <>
@@ -267,26 +333,28 @@ export default function ChatApp() {
           )}
         </header>
 
-        {/* Language switcher */}
-        <div className="z-20 flex items-center gap-1.5 bg-[#128C7E] px-3 py-1.5">
-          {LANGUAGES.map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => {
-                setLanguage(lang);
-                saveLanguage(lang);
-              }}
-              className={`rounded-full px-3 py-1 text-[13px] font-semibold transition-colors ${
-                language === lang
-                  ? "bg-white text-[#075E54]"
-                  : "bg-white/15 text-white hover:bg-white/25"
-              }`}
-            >
-              {lang === "Hindi" ? "हिंदी" : lang}
-            </button>
-          ))}
-        </div>
+        {/* Language switcher — appears once a language is chosen */}
+        {languageKnown === true && (
+          <div className="z-20 flex items-center gap-1.5 bg-[#128C7E] px-3 py-1.5">
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => {
+                  setLanguage(lang);
+                  saveLanguage(lang);
+                }}
+                className={`rounded-full px-3 py-1 text-[13px] font-semibold transition-colors ${
+                  language === lang
+                    ? "bg-white text-[#075E54]"
+                    : "bg-white/15 text-white hover:bg-white/25"
+                }`}
+              >
+                {NATIVE_LABEL[lang]}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Chat canvas */}
         <main
@@ -301,22 +369,83 @@ export default function ChatApp() {
             </span>
           </div>
 
-          {/* Encryption-style notice */}
-          <p className="mx-auto max-w-[92%] rounded-lg bg-[#FCF4CB] px-3 py-2 text-center text-[12.5px] leading-snug text-[#54656F] shadow-sm">
-            {t.encryption}
-          </p>
+          {/* Encryption-style notice + welcome — only once a language is chosen */}
+          {languageKnown === true && (
+            <>
+              <p className="mx-auto max-w-[92%] rounded-lg bg-[#FCF4CB] px-3 py-2 text-center text-[12.5px] leading-snug text-[#54656F] shadow-sm">
+                {t.encryption}
+              </p>
 
-          {/* Welcome bubble */}
-          <div className="flex">
-            <div className="wa-in wa-bubble max-w-[90%] rounded-lg rounded-tl-none bg-white px-2.5 py-1.5 shadow-sm">
-              <p className="text-[16px] leading-relaxed text-gray-900">
-                <span className="font-semibold text-[#075E54]">Kavach:</span> {t.welcome}
-              </p>
-              <p className="mt-0.5 text-right text-[11px] text-[#8696A0]">
-                {welcomeTime !== null && formatTime(welcomeTime)}
-              </p>
-            </div>
-          </div>
+              {!freshOnboard && (
+                <div className="flex">
+                  <div className="wa-in wa-bubble max-w-[90%] rounded-lg rounded-tl-none bg-white px-2.5 py-1.5 shadow-sm">
+                    <p className="text-[16px] leading-relaxed text-gray-900">
+                      <span className="font-semibold text-[#075E54]">Kavach:</span> {t.welcome}
+                    </p>
+                    <p className="mt-0.5 text-right text-[11px] text-[#8696A0]">
+                      {welcomeTime !== null && formatTime(welcomeTime)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* In-chat onboarding: the language question, asked as a WhatsApp message */}
+          {onboardVisible && (
+            <>
+              <div className="flex">
+                <div className="wa-in wa-bubble max-w-[92%] rounded-lg rounded-tl-none bg-white px-2.5 py-2 shadow-sm">
+                  <p className="text-[16px] leading-relaxed text-[#111B21]">
+                    नमस्ते! 🙏 I'm <span className="font-semibold text-[#075E54]">Kavach</span> 🛡️ —
+                    your family's scam checker.
+                  </p>
+                  <p className="mt-1.5 text-[15px] leading-relaxed text-[#3B4A54]">
+                    Forward any suspicious SMS, WhatsApp message or screenshot here — before you
+                    click.
+                    <br />
+                    कोई भी संदिग्ध संदेश क्लिक करने से पहले यहाँ भेजें।
+                    <br />
+                    कोणताही संशयास्पद संदेश क्लिक करण्यापूर्वी येथे पाठवा.
+                  </p>
+                  <p className="mt-1 text-right text-[11px] text-[#8696A0]">
+                    {welcomeTime !== null && formatTime(welcomeTime)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex">
+                <div className="wa-bubble max-w-[94%]">
+                  <div className="wa-in rounded-lg rounded-tl-none bg-white px-2.5 py-2 shadow-sm">
+                    <p className="text-[15.5px] font-semibold leading-relaxed text-[#111B21]">
+                      Which language should we talk in?
+                    </p>
+                    <p className="mt-0.5 text-[15px] leading-relaxed text-[#3B4A54]">
+                      हम किस भाषा में बात करें? · आपण कोणत्या भाषेत बोलूया?
+                    </p>
+                    <p className="mt-1 text-[14px] text-[#667781]">
+                      1️⃣ English · 2️⃣ हिंदी · 3️⃣ मराठी · 4️⃣ Hinglish
+                    </p>
+                    <p className="mt-1 text-right text-[11px] text-[#8696A0]">
+                      {welcomeTime !== null && formatTime(welcomeTime)}
+                    </p>
+                  </div>
+                  <div className="mt-1 space-y-1">
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => handleLanguageChoice(lang, NATIVE_LABEL[lang])}
+                        className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
+                      >
+                        {NATIVE_LABEL[lang]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
           {messages.map((message) => {
             if (message.role === "user") {
@@ -360,6 +489,21 @@ export default function ChatApp() {
               );
             }
 
+            if (message.role === "kavach-note") {
+              return (
+                <div key={message.id} className="flex">
+                  <div className="wa-in wa-bubble max-w-[92%] rounded-lg rounded-tl-none bg-white px-2.5 py-2 shadow-sm">
+                    <p className="text-[15.5px] leading-relaxed whitespace-pre-wrap text-[#111B21]">
+                      {message.text}
+                    </p>
+                    <p className="mt-1 text-right text-[11px] text-[#8696A0]">
+                      {formatTime(message.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
             if (message.role === "banner") {
               return (
                 <div key={message.id} className="wa-bubble flex justify-center py-1">
@@ -386,7 +530,7 @@ export default function ChatApp() {
             );
           })}
 
-          {analyzing && (
+          {languageKnown === true && analyzing && (
             <div className="flex">
               <div className="wa-in wa-bubble rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
                 <p className="flex items-center gap-2 text-[15px] text-[#667781]">
@@ -415,12 +559,20 @@ export default function ChatApp() {
           )}
         </main>
 
-        <QuickChips language={language} disabled={analyzing} onPick={handlePickSample} />
-        <InputBar language={language} disabled={analyzing} onSend={handleSend} onNotice={(msg) =>
-          setMessages((prev) => [...prev, { id: newId(), role: "error", text: msg, createdAt: Date.now() }])
-        } />
-          </>
+        {languageKnown === true && (
+          <QuickChips language={language} disabled={analyzing} onPick={handlePickSample} />
         )}
+        <InputBar
+          language={language}
+          disabled={analyzing}
+          onSend={handleSend}
+          placeholderOverride={
+            languageKnown === false ? "Type: English · हिंदी · मराठी · Hinglish" : undefined
+          }
+          onNotice={(msg) =>
+            setMessages((prev) => [...prev, { id: newId(), role: "error", text: msg, createdAt: Date.now() }])
+          }
+        />
 
         <FamilyGuardModal
           open={guardOpen}

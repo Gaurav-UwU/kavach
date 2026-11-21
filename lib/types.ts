@@ -35,4 +35,5 @@ export type ChatMessage =
       createdAt: number;
     }
   | { id: string; role: "banner"; name: string; relation: string; summary: string; createdAt: number }
-  | { id: string; role: "error"; text: string; createdAt: number };
+  | { id: string; role: "error"; text: string; createdAt: number }
+  | { id: string; role: "kavach-note"; text: string; createdAt: number };
