@@ -175,6 +175,12 @@ export default function ChatApp() {
         const analysis = (await response.json()) as Analysis & { engine?: "gemini" | "heuristic" };
         const engine = analysis.engine === "gemini" ? "gemini" : "heuristic";
 
+        // Auto-Alert: on HIGH_RISK with the toggle ON, deliver the alert to the
+        // Family Guard automatically — no tap needed.
+        const digits = normalizeIndianPhone(activeGuard.phone);
+        const autoDeliver =
+          analysis.verdict === "HIGH_RISK" && activeGuard.autoAlert && digits !== null;
+
         setMessages((prev) => [
           ...prev,
           {
@@ -183,38 +189,34 @@ export default function ChatApp() {
             analysis,
             lang: language,
             engine,
+            alertDelivered: autoDeliver,
             createdAt: Date.now(),
           },
         ]);
 
-        // Auto-Alert: on HIGH_RISK with the toggle ON, deliver the alert to the
-        // Family Guard automatically — no tap needed.
-        if (analysis.verdict === "HIGH_RISK" && activeGuard.autoAlert) {
-          const digits = normalizeIndianPhone(activeGuard.phone);
-          if (digits) {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: newId(),
-                role: "alert-sent",
-                text: analysis.familyAlertSummary,
-                toName: activeGuard.name,
-                toRelation: activeGuard.relation,
-                phone: digits,
-                createdAt: Date.now(),
-              },
-            ]);
-          } else {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: newId(),
-                role: "kavach-note",
-                text: STRINGS[language].autoAlertNoContact,
-                createdAt: Date.now(),
-              },
-            ]);
-          }
+        if (autoDeliver && digits) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: newId(),
+              role: "alert-sent",
+              text: analysis.familyAlertSummary,
+              toName: activeGuard.name,
+              toRelation: activeGuard.relation,
+              phone: digits,
+              createdAt: Date.now(),
+            },
+          ]);
+        } else if (analysis.verdict === "HIGH_RISK" && activeGuard.autoAlert && !digits) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: newId(),
+              role: "kavach-note",
+              text: STRINGS[language].autoAlertNoContact,
+              createdAt: Date.now(),
+            },
+          ]);
         }
       } catch {
         setMessages((prev) => [
@@ -230,7 +232,7 @@ export default function ChatApp() {
 
   /** Delivers the redacted alert into the conversation as an outgoing message. */
   const handleSendAlertToGuard = useCallback(
-    (summary: string) => {
+    (kavachId: string, summary: string) => {
       const activeGuard = guard ?? loadGuard();
       const digits = normalizeIndianPhone(activeGuard.phone);
       if (!digits) {
@@ -238,6 +240,12 @@ export default function ChatApp() {
         setGuardOpen(true);
         return;
       }
+      // Mark the originating verdict so its manual send button disappears.
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === kavachId && m.role === "kavach" ? { ...m, alertDelivered: true } : m,
+        ),
+      );
       setMessages((prev) => [
         ...prev,
         {
@@ -585,7 +593,8 @@ export default function ChatApp() {
                     engine={message.engine}
                     guard={guard ?? loadGuard()}
                     time={formatTime(message.createdAt)}
-                    onSendAlert={handleSendAlertToGuard}
+                    alertDelivered={message.alertDelivered === true}
+                    onSendAlert={(summary) => handleSendAlertToGuard(message.id, summary)}
                   />
                 </div>
               );

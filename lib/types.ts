@@ -32,6 +32,8 @@ export type ChatMessage =
       analysis: Analysis;
       lang: Language;
       engine: "gemini" | "heuristic";
+      /** True once the alert has been delivered to the Family Guard (auto or manual). */
+      alertDelivered?: boolean;
       createdAt: number;
     }
   | { id: string; role: "error"; text: string; createdAt: number }

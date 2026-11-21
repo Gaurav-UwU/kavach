@@ -12,6 +12,8 @@ interface VerdictCardProps {
   engine: "gemini" | "heuristic";
   guard: GuardContact;
   time: string;
+  /** True once the alert has been delivered — hides the manual send button. */
+  alertDelivered: boolean;
   /** Delivers the redacted alert into the conversation (simulated send). */
   onSendAlert: (familyAlertSummary: string) => void;
 }
@@ -29,6 +31,7 @@ export default function VerdictCard({
   engine,
   guard,
   time,
+  alertDelivered,
   onSendAlert,
 }: VerdictCardProps) {
   const t = STRINGS[lang];
@@ -55,7 +58,9 @@ export default function VerdictCard({
     onSendAlert(analysis.familyAlertSummary);
   };
 
-  const showActions = analysis.verdict !== "LIKELY_SAFE";
+  // Manual send appears only when the alert wasn't already auto-delivered
+  // (Auto-Alert OFF, or no valid contact set at analysis time).
+  const showActions = analysis.verdict !== "LIKELY_SAFE" && !alertDelivered;
 
   return (
     <div className="wa-bubble max-w-[94%]">
