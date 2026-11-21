@@ -303,18 +303,14 @@ export default function ChatApp() {
             if (message.role === "kavach") {
               return (
                 <div key={message.id} className="flex">
-                  <div className="wa-in wa-bubble max-w-[94%] rounded-lg rounded-tl-none bg-white px-3 py-2.5 shadow-sm">
-                    <VerdictCard
-                      analysis={message.analysis}
-                      lang={message.lang}
-                      engine={message.engine}
-                      guard={guard ?? loadGuard()}
-                      onFixGuard={() => setGuardOpen(true)}
-                    />
-                    <p className="mt-1.5 text-right text-[11px] text-[#8696A0]">
-                      {formatTime(message.createdAt)}
-                    </p>
-                  </div>
+                  <VerdictCard
+                    analysis={message.analysis}
+                    lang={message.lang}
+                    engine={message.engine}
+                    guard={guard ?? loadGuard()}
+                    time={formatTime(message.createdAt)}
+                    onFixGuard={() => setGuardOpen(true)}
+                  />
                 </div>
               );
             }
@@ -322,14 +318,16 @@ export default function ChatApp() {
             if (message.role === "banner") {
               return (
                 <div key={message.id} className="wa-bubble flex justify-center py-1">
-                  <button
-                    type="button"
-                    onClick={() => openAlert(message.name, message.relation, message.summary)}
-                    className="rounded-full border border-[#075E54]/25 bg-[#E7FFDB] px-3 py-1.5 text-[13px] font-medium text-[#075E54] shadow-sm transition-colors hover:bg-[#d8f5c8]"
-                  >
+                  <p className="max-w-[92%] text-center text-[12.5px] leading-snug text-[#54656F]">
                     🛡️ {t.banner(message.name, message.relation)} —{" "}
-                    <span className="font-bold underline">{t.viewAlert}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => openAlert(message.name, message.relation, message.summary)}
+                      className="font-semibold text-[#027EB5] underline"
+                    >
+                      {t.viewAlert}
+                    </button>
+                  </p>
                 </div>
               );
             }

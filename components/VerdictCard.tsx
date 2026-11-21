@@ -12,17 +12,26 @@ interface VerdictCardProps {
   lang: Language;
   engine: "gemini" | "heuristic";
   guard: GuardContact;
+  time: string;
   /** Called when the trusted contact has no valid phone and must be fixed first. */
   onFixGuard: () => void;
 }
 
-const PILL_STYLES: Record<Analysis["verdict"], string> = {
-  HIGH_RISK: "bg-red-100 text-red-800 border-red-300",
-  CAUTION: "bg-amber-100 text-amber-900 border-amber-300",
-  LIKELY_SAFE: "bg-green-100 text-green-800 border-green-300",
-};
-
-export default function VerdictCard({ analysis, lang, engine, guard, onFixGuard }: VerdictCardProps) {
+/**
+ * A Kavach verdict rendered the way an official WhatsApp Business bot would send
+ * it (Cloud API "interactive message"): a plain-text bubble using WhatsApp's own
+ * formatting conventions (*bold*, _italic_, typed "•" bullets, emoji status dot),
+ * with quick-reply buttons attached BELOW the bubble — because buttons inside a
+ * chat bubble are impossible in real WhatsApp.
+ */
+export default function VerdictCard({
+  analysis,
+  lang,
+  engine,
+  guard,
+  time,
+  onFixGuard,
+}: VerdictCardProps) {
   const t = STRINGS[lang];
   const [speaking, setSpeaking] = useState(false);
 
@@ -59,41 +68,38 @@ export default function VerdictCard({ analysis, lang, engine, guard, onFixGuard 
   const showActions = analysis.verdict !== "LIKELY_SAFE";
 
   return (
-    <div className="space-y-2 text-[16px] leading-relaxed text-gray-900">
-      <div
-        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-bold ${PILL_STYLES[analysis.verdict]}`}
-      >
-        <span aria-hidden>{VERDICT_DOT[analysis.verdict]}</span>
-        {t.verdictLabel[analysis.verdict]}
+    <div className="wa-bubble max-w-[94%]">
+      {/* Message body — indistinguishable from a plain WhatsApp text message */}
+      <div className="wa-in rounded-lg rounded-tl-none bg-white px-2.5 py-2 shadow-sm">
+        <div className="space-y-1.5 text-[15.5px] leading-relaxed text-[#111B21]">
+          <p className="font-bold">
+            {VERDICT_DOT[analysis.verdict]} {t.verdictLabel[analysis.verdict]}
+          </p>
+          <p className="text-[13.5px] italic text-[#667781]">{analysis.scamType}</p>
+          <p className="pt-0.5 font-semibold">{t.why}</p>
+          {analysis.reasons.map((reason, i) => (
+            <p key={i}>• {reason}</p>
+          ))}
+          <p className="pt-0.5 font-semibold">{t.doNow}</p>
+          <p>{analysis.nextAction}</p>
+        </div>
+        <p className="mt-1 text-right text-[11px] text-[#8696A0]">{time}</p>
       </div>
 
-      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-        {analysis.scamType}
-      </p>
-
-      <p className="font-bold">{t.why}</p>
-      <ul className="list-disc space-y-1 pl-5">
-        {analysis.reasons.map((reason, i) => (
-          <li key={i}>{reason}</li>
-        ))}
-      </ul>
-
-      <p className="font-bold">{t.doNow}</p>
-      <p>{analysis.nextAction}</p>
-
+      {/* Quick-reply buttons — WhatsApp Business style, below the bubble */}
       {showActions && (
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="mt-1 space-y-1">
           <button
             type="button"
             onClick={handleListen}
-            className="rounded-full bg-[#075E54] px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0a7a6d] active:scale-95"
+            className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
           >
-            {speaking ? `⏹ ${t.stopListening}` : `🔊 ${t.listen}`}
+            {speaking ? t.stopListening : `🔊 ${t.listen}`}
           </button>
           <button
             type="button"
             onClick={handleSendAlert}
-            className="rounded-full bg-[#25D366] px-3.5 py-2 text-sm font-semibold text-[#07341c] shadow-sm transition-colors hover:bg-[#1fb959] active:scale-95"
+            className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
           >
             📲 {t.sendAlert}
           </button>
@@ -101,7 +107,7 @@ export default function VerdictCard({ analysis, lang, engine, guard, onFixGuard 
       )}
 
       {engine === "heuristic" && (
-        <p className="pt-0.5 text-[11px] text-gray-400">⚡ {t.offlineNote}</p>
+        <p className="mt-1 pl-1 text-[11px] text-[#8696A0]">⚡ {t.offlineNote}</p>
       )}
     </div>
   );
