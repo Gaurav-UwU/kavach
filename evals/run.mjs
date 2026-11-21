@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
  * Kavach eval suite — hits POST /api/analyze on a running server and checks:
- *   1. Verdict tier matches expectation (adjacent tiers allowed by default,
- *      because the Gemini engine can reasonably differ by one notch).
+ *   1. Verdict tier matches expectation under the **fail-safe asymmetric rule**:
+ *        HIGH_RISK   -> exact match only (never soften a real threat)
+ *        CAUTION     -> CAUTION or HIGH_RISK (failing safe is fine; never LIKELY_SAFE)
+ *        LIKELY_SAFE -> exact match only (no false alarms on genuine messages)
  *   2. `reasons` is 1–3 non-empty strings; `nextAction` non-empty.
  *   3. `familyAlertSummary` leaks NO sensitive numbers (OTP/PIN/account/card),
  *      honouring per-case `mustNotInclude` lists.
@@ -19,7 +21,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const BASE_URL = process.env.EVAL_BASE_URL ?? "http://localhost:3000";
-const TIER_ORDER = ["LIKELY_SAFE", "CAUTION", "HIGH_RISK"];
+
+/** Fail-safe asymmetric tier rule (see header comment). */
+function verdictPasses(actual, expected, adjacentAllowed) {
+  if (actual === expected) return true;
+  if (adjacentAllowed === false) return false;
+  return expected === "CAUTION" && actual === "HIGH_RISK";
+}
 
 // Must mirror lib/redact.ts whitelists so preserved helplines/years don't fail.
 const HELPLINE_WHITELIST = new Set([
@@ -71,10 +79,9 @@ async function runCase(baseUrl, kase) {
     return { ok: false, failures: ["response was not JSON"], engine };
   }
 
-  // 1. Verdict tier
-  if (kase.expected !== body.verdict) {
-    const adjacent = kase.adjacentAllowed !== false && tierDistance(body.verdict, kase.expected) === 1;
-    if (!adjacent) failures.push(`verdict: expected ${kase.expected}, got ${body.verdict}`);
+  // 1. Verdict tier (fail-safe asymmetric rule)
+  if (!verdictPasses(body.verdict, kase.expected, kase.adjacentAllowed)) {
+    failures.push(`verdict: expected ${kase.expected}, got ${body.verdict}`);
   }
 
   // 2. Shape of the reply

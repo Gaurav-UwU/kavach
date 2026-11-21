@@ -110,6 +110,13 @@
       "expected": "HIGH_RISK"
     },
     {
+      "id": "ambiguous-short-text",
+      "why": "Unjudgeable two-word text - must fail safe to CAUTION 'Needs a Second Opinion'",
+      "language": "English",
+      "text": "Call me back",
+      "expected": "CAUTION"
+    },
+    {
       "id": "redaction-otp-account",
       "why": "Family alert summary must leak zero OTP/PIN/account numbers",
       "language": "English",

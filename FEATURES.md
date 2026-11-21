@@ -29,7 +29,7 @@ Live: https://kavach-gaurav-uwus-projects.vercel.app
 - **Mobile**: full-bleed layout (no frame), `viewport-fit=cover` + `env(safe-area-inset-*)` padding so notches and home bars never cover the header or input; transparent tap highlight
 - Header: shield avatar, "Kavach" + verified badge, **Online** / **typing…** live status, 🛡️ Family Guard button, ⋮ menu
 - **⋮ menu**: Family Guard settings · Clear chat · Reset prototype
-- Chat canvas: WhatsApp **doodle wallpaper**, **TODAY** date chip, yellow **encryption-style notice** ("messages never leave your phone")
+- Chat canvas: WhatsApp **doodle wallpaper**, **TODAY** date chip, yellow **encryption-style notice** ("No chats are stored — sensitive numbers are redacted before checking")
 - Bubbles: proper **tails** (incoming/outgoing), user bubbles in WhatsApp green with **blue double-ticks ✓✓** and timestamps, subtle pop-in animation
 - **Scroll-to-bottom FAB** appears when scrolled up
 - **Typing indicator**: animated dots bubble + header status change while analyzing

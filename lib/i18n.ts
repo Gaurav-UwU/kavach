@@ -70,7 +70,7 @@ export const STRINGS: Record<Language, Strings> = {
     analyzing: "Kavach is checking this message…",
     today: "TODAY",
     encryption:
-      "🔒 Messages in this demo never leave your phone. Only the text you send for checking is analyzed.",
+      "🔒 No chats are stored. Sensitive numbers are redacted before messages are checked for scams.",
     typing: "typing…",
     listening: "Listening…",
     voiceUnsupported: "Voice input is not supported in this browser",
@@ -135,7 +135,7 @@ export const STRINGS: Record<Language, Strings> = {
     analyzing: "कवच यह संदेश जाँच रहा है…",
     today: "आज",
     encryption:
-      "🔒 इस डेमो चैट के संदेश आपके फ़ोन से बाहर नहीं जाते। सिर्फ़ जाँच के लिए भेजा गया टेक्स्ट ही जाँचा जाता है।",
+      "🔒 कोई चैट सेव नहीं की जाती। संदेश जाँचे से पहले संवेदनशील नंबर छिपा दिए जाते हैं।",
     typing: "टाइप कर रहा है…",
     listening: "सुन रहा हूँ…",
     voiceUnsupported: "इस ब्राउज़र में वॉइस इनपुट नहीं चलता",
@@ -200,7 +200,7 @@ export const STRINGS: Record<Language, Strings> = {
     analyzing: "कवच हा संदेश तपासत आहे…",
     today: "आज",
     encryption:
-      "🔒 या डेमो चॅटमधील संदेश तुमच्या फोनबाहेर जात नाहीत. तपासणीसाठी पाठवलेला मजकूरच तपासला जातो.",
+      "🔒 कोणतीही चॅट साठवली जात नाही. संदेश तपासण्यापूर्वी संवेदनशील क्रमांक लपवले जातात.",
     typing: "टाइप करत आहे…",
     listening: "ऐकत आहे…",
     voiceUnsupported: "या ब्राउझरमध्ये व्हॉइस इनपुट चालत नाही",
@@ -265,7 +265,7 @@ export const STRINGS: Record<Language, Strings> = {
     analyzing: "Kavach ye message check kar raha hai…",
     today: "AAJ",
     encryption:
-      "🔒 Is demo chat ke messages aapke phone se bahar nahi jaate. Sirf check karne bheja gaya text hi analyze hota hai.",
+      "🔒 Koi chat store nahi hoti. Messages check hone se pehle sensitive numbers redact kar diye jaate hain.",
     typing: "typing…",
     listening: "Sun raha hoon…",
     voiceUnsupported: "Is browser mein voice input nahi chalta",
