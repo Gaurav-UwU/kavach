@@ -109,7 +109,7 @@ export default function InputBar({ language, disabled, onSend, onNotice, placeho
   };
 
   return (
-    <div className="bg-[#F0F2F5] px-2 pb-2 pt-1">
+    <div className="bg-[#F0F2F5] px-2 pb-safe pt-1">
       {attachment && (
         <div className="mb-2 flex items-center gap-2 rounded-lg bg-white px-2.5 py-2 shadow-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}

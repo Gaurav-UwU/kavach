@@ -146,3 +146,34 @@ export function ShieldAvatar({ className }: IconProps) {
     </svg>
   );
 }
+
+/** Signal / Wi-Fi / battery cluster for the desktop status bar. */
+export function StatusIcons({ className }: IconProps) {
+  return (
+    <span aria-hidden className={`inline-flex items-center ${className ?? ""}`}>
+      <svg viewBox="0 0 18 12" className="h-3 w-[18px]" fill="white">
+        <rect x="0" y="8" width="3" height="4" rx="0.8" />
+        <rect x="5" y="5.5" width="3" height="6.5" rx="0.8" />
+        <rect x="10" y="3" width="3" height="9" rx="0.8" />
+        <rect x="15" y="0" width="3" height="12" rx="0.8" opacity="0.4" />
+      </svg>
+      <svg
+        viewBox="0 0 16 12"
+        className="ml-1.5 h-3 w-4"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      >
+        <path d="M1.5 4.5a10 10 0 0 1 13 0" />
+        <path d="M4 7.5a6.5 6.5 0 0 1 8 0" />
+        <circle cx="8" cy="10.5" r="1.2" fill="white" stroke="none" />
+      </svg>
+      <svg viewBox="0 0 25 12" className="ml-1.5 h-3 w-6" fill="none" stroke="white" strokeWidth="1.2">
+        <rect x="0.6" y="0.6" width="20" height="10.8" rx="2.5" />
+        <rect x="2.6" y="2.6" width="13" height="6.8" rx="1.2" fill="white" stroke="none" />
+        <path d="M22.8 4v4a2 2 0 0 0 0-4z" fill="white" stroke="none" />
+      </svg>
+    </span>
+  );
+}

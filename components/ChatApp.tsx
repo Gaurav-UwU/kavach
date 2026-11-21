@@ -18,6 +18,7 @@ import {
   RestartIcon,
   ShieldAvatar,
   ShieldIcon,
+  StatusIcons,
   TrashIcon,
   VerifiedBadge,
 } from "./icons";
@@ -29,6 +30,13 @@ function newId(): string {
 
 function formatTime(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatClock(ts: number): string {
+  // Status-bar style clock: no AM/PM suffix.
+  return new Date(ts)
+    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    .replace(/\s?(am|pm)\.?/i, "");
 }
 
 const NATIVE_LABEL: Record<Language, string> = {
@@ -371,10 +379,25 @@ export default function ChatApp() {
   );
 
   return (
-    <div className="flex min-h-dvh items-stretch justify-center bg-[#0b141a] sm:p-6">
-      <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-3rem)] sm:rounded-xl">
-        {/* Top header */}
-        <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 py-2 text-white">
+    <div className="flex min-h-dvh items-stretch justify-center bg-[#0b141a] sm:items-center sm:bg-[radial-gradient(1100px_600px_at_50%_18%,#1c2b32_0%,#0b141a_65%)] sm:p-6">
+      {/* Phone shell wrapper — desktop frame decorations anchor here */}
+      <div className="relative">
+        {/* Side buttons (desktop frame only) */}
+        <div aria-hidden className="absolute -left-[15px] top-28 hidden h-9 w-[4px] rounded-l-md bg-[#2f2f31] sm:block" />
+        <div aria-hidden className="absolute -left-[15px] top-44 hidden h-14 w-[4px] rounded-l-md bg-[#2f2f31] sm:block" />
+        <div aria-hidden className="absolute -left-[15px] top-64 hidden h-14 w-[4px] rounded-l-md bg-[#2f2f31] sm:block" />
+        <div aria-hidden className="absolute -right-[15px] top-36 hidden h-20 w-[4px] rounded-r-md bg-[#2f2f31] sm:block" />
+
+        <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-5rem)] sm:max-h-[860px] sm:min-h-[600px] sm:w-[402px] sm:max-w-none sm:rounded-[3rem] sm:border-[12px] sm:border-[#17171a] sm:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.85)]">
+          {/* Status bar — part of the desktop phone frame */}
+          <div className="relative hidden items-center justify-between bg-[#075E54] px-7 pb-1 pt-2.5 text-[12.5px] font-medium text-white sm:flex">
+            <span>{welcomeTime !== null && formatClock(welcomeTime)}</span>
+            <StatusIcons />
+          </div>
+          <div aria-hidden className="absolute left-1/2 top-[6px] z-40 hidden h-4 w-4 -translate-x-1/2 rounded-full bg-[#17171a] sm:block" />
+
+          {/* Top header */}
+        <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 pb-2 pt-safe text-white">
           <ShieldAvatar className="h-10 w-10 shrink-0" />
           <div className="min-w-0 flex-1 leading-tight">
             <p className="flex items-center gap-1.5 text-[17px] font-medium">
@@ -767,6 +790,10 @@ export default function ChatApp() {
           onSave={handleSaveGuard}
           onClose={() => setGuardOpen(false)}
         />
+
+        {/* Home indicator — desktop phone frame */}
+        <div aria-hidden className="pointer-events-none absolute bottom-1.5 left-1/2 z-40 hidden h-1 w-28 -translate-x-1/2 rounded-full bg-[#0b141a]/25 sm:block" />
+        </div>
       </div>
     </div>
   );
