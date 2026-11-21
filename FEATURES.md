@@ -45,11 +45,20 @@ Live: https://kavach-gaurav-uwus-projects.vercel.app
 
 ## 5. Quick-test chips
 
-Four pre-loaded "Forward a Sample Message" chips — one tap sends and analyzes instantly:
-1. ⚡ Electricity Bill Cut (fake utility disconnection)
-2. 🏦 SBI KYC (.apk) (fake app malware)
-3. 🚨 Digital Arrest (police/courier intimidation)
-4. ✅ Real Bank Alert (genuine transaction alert — should NOT be flagged)
+Eleven pre-loaded "Forward a Sample Message" chips (horizontally scrollable) — one tap sends and analyzes instantly, covering all three verdict tiers:
+1. ⚡ Electricity Bill Cut (fake utility disconnection) → HIGH_RISK
+2. 🏦 SBI KYC (.apk) (fake app malware) → HIGH_RISK
+3. 🚨 Digital Arrest (police/courier intimidation) → HIGH_RISK
+4. ✅ Real Bank Alert (genuine transaction alert — should NOT be flagged) → LIKELY_SAFE
+5. 👨‍👩‍👦 Family New Number ("Hi Mummy" hijack) → HIGH_RISK
+6. 📈 Trading 84% Profit (investment group scam) → HIGH_RISK
+7. 📱 QR to Receive (reverse-UPI collect) → HIGH_RISK
+8. 🚔 E-Challan APK (fake traffic fine) → HIGH_RISK
+9. 💼 Task Job Fee (pay-to-earn offer) → CAUTION
+10. 🧾 IT Refund Link (refund phishing) → CAUTION
+11. 📦 Delivery Update (routine order message) → LIKELY_SAFE
+
+Chip texts are drawn from the researched scam families in `docs/scam-typologies-india-2023-2026.md`.
 
 ## 6. AI analysis engine — `POST /api/analyze`
 
