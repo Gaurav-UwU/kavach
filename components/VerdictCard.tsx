@@ -58,9 +58,11 @@ export default function VerdictCard({
     onSendAlert(analysis.familyAlertSummary);
   };
 
-  // Manual send appears only when the alert wasn't already auto-delivered
-  // (Auto-Alert OFF, or no valid contact set at analysis time).
-  const showActions = analysis.verdict !== "LIKELY_SAFE" && !alertDelivered;
+  // Listen is always available on HIGH_RISK/CAUTION. Manual send appears only
+  // when the alert wasn't already auto-delivered (Auto-Alert OFF, or no valid
+  // contact set at analysis time).
+  const showListen = analysis.verdict !== "LIKELY_SAFE";
+  const showSend = showListen && !alertDelivered;
 
   return (
     <div className="wa-bubble max-w-[94%]">
@@ -81,8 +83,10 @@ export default function VerdictCard({
         <p className="mt-1 text-right text-[11px] text-[#8696A0]">{time}</p>
       </div>
 
-      {/* Quick-reply buttons — WhatsApp Business style, below the bubble */}
-      {showActions && (
+      {/* Quick-reply buttons — WhatsApp Business style, below the bubble.
+          Listen is always available on HIGH_RISK/CAUTION; manual send only
+          until the alert has been delivered. */}
+      {showListen && (
         <div className="mt-1 space-y-1">
           <button
             type="button"
@@ -91,13 +95,15 @@ export default function VerdictCard({
           >
             {speaking ? t.stopListening : `🔊 ${t.listen}`}
           </button>
-          <button
-            type="button"
-            onClick={handleSendAlert}
-            className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
-          >
-            {t.sendToGuard(guard.name)}
-          </button>
+          {showSend && (
+            <button
+              type="button"
+              onClick={handleSendAlert}
+              className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
+            >
+              {t.sendToGuard(guard.name)}
+            </button>
+          )}
         </div>
       )}
 
