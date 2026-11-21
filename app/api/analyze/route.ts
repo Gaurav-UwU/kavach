@@ -17,7 +17,7 @@ const AnalysisSchema = z.object({
     .describe(
       "Short label, e.g. 'Digital Arrest Scam', 'Fake APK Malware', 'Legitimate Bank Alert'",
     ),
-  reasons: z.array(z.string()).min(1).max(3).describe("Plain-language bullets in requested language"),
+  reasons: z.array(z.string()).min(1).max(5).describe("Plain-language bullets in requested language (the server trims to 3)"),
   nextAction: z.string().describe("1 calm, clear instruction in requested language"),
   familyAlertSummary: z.string().describe(
     "2-line summary for the user's child with all OTPs, PINs, and account numbers redacted as [REDACTED]",
@@ -42,7 +42,8 @@ VERDICT RULES — judge by these tests; the examples are illustrations, not the 
 - HIGH_RISK: someone impersonates authority (bank, police, CBI, customs, electricity/gas board, TRAI, government), OR asks for OTP/PIN/CVV/passwords or a .apk/unknown app install, OR threatens arrest/harm/account-freeze with urgency to pay or call, OR asks money "to receive money" (QR scan to receive, UPI PIN to receive, prize/refund processing fees, guaranteed-return trading groups), OR pretends to be a family member from a "new number" asking for money or a 6-digit code, OR blackmails (sextortion, morphed photos).
   Examples: "digital arrest" calls or parcels with drugs; "electricity cut tonight, call this officer"; "KYC expired, install SBI_KYC.apk"; "KBC lottery, pay GST to claim"; "Hi Mummy, my phone is lost, this is my new number, send money"; "scan this QR and enter PIN to receive"; "pay ₹500 challan now" with an .apk or non-parivahan link; "LPG subsidy stops, update KYC"; "income tax refund, click to update bank account".
 - CAUTION: possibly fake, verify first. Examples: "KYC/account update" links; job/task offers with registration or advance fees; unexpected links to verify/claim/refund; customer-care numbers found on Google; loan offers.
-- LIKELY_SAFE: routine informational messages — bank transaction debit/credit alerts, delivery/order updates, greetings, OTPs a service sent to the user at their own request. No asks for codes, installs, payments, or calls.
+- LIKELY_SAFE: routine informational messages that only INFORM — bank transaction debit/credit alerts (a specific completed transaction, even with a customer-care or "not you?" helpline line), delivery/order updates, greetings, OTPs a service sent to the user at their own request. They never ask for codes, installs, payments, or upfront fees. A call-this-number line in a plain transaction alert is normal bank practice, not a scam signal.
+- Calling a number is only dangerous when the message ALSO pressures to pay, share codes, install something, or threatens consequences. Impersonation requires the sender to ask for something.
 
 WHEN UNSURE:
 - Torn between two verdicts → choose the more careful one, but HIGH_RISK only with clear evidence (impersonation, credentials, threats). Between LIKELY_SAFE and CAUTION → choose CAUTION.
@@ -90,74 +91,75 @@ export async function POST(request: Request) {
   const text = rawText.slice(0, 4000);
   const redactedText = text ? redactSensitive(text) : "";
 
-  const apiKey = process.env.GROQ_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GROQ_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
   if (apiKey) {
-    try {
-      let engine: "groq" | "gemini";
-      let model: Parameters<typeof generateObject>[0]["model"];
+    const groqVisionModel = process.env.GROQ_VISION_MODEL;
+    const groqCanHandleThis = !imageBase64 || Boolean(groqVisionModel);
 
-      const groqVisionModel = process.env.GROQ_VISION_MODEL;
-
-      if (process.env.GROQ_API_KEY && (!imageBase64 || groqVisionModel)) {
-        // Primary engine: Groq (OpenAI-compatible, free tier).
-        // supportsStructuredOutputs sends the zod schema as a native json_schema
-        // response format — required for exact schema compliance.
-        // Screenshots need a vision-capable model; without one they fall through.
-        const groq = createOpenAICompatible({
-          name: "groq",
-          baseURL: "https://api.groq.com/openai/v1",
-          apiKey: process.env.GROQ_API_KEY,
-          supportsStructuredOutputs: true,
-        });
-        engine = "groq";
-        model = groq(
-          imageBase64 ? (groqVisionModel as string) : (process.env.GROQ_MODEL ?? "openai/gpt-oss-120b"),
-        );
-      } else if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-        // Fallback engine: Gemini (only when no Groq key is configured).
-        const google = createGoogleGenerativeAI({ apiKey });
-        engine = "gemini";
-        model = google(process.env.GEMINI_MODEL ?? "gemini-2.5-flash");
-      } else {
-        // Groq key exists but this is a screenshot and no vision model is set.
-        throw new Error("no vision-capable engine available for image analysis");
-      }
-
-      const { object } = await generateObject({
-        model,
-        schema: AnalysisSchema,
-        system: SYSTEM_PROMPT.replace("<LANGUAGE>", LANGUAGE_INSTRUCTION[language]),
-        messages: [
-          {
-            role: "user",
-            content: [
-              ...(imageBase64
-                ? [{ type: "image" as const, image: imageBase64 }]
-                : []),
-              {
-                type: "text" as const,
-                text: imageBase64
-                  ? `Analyze this screenshot of a message. ${redactedText ? `Any accompanying text: "${redactedText}"` : ""}`
-                  : `Analyze this message: "${redactedText}"`,
-              },
-            ],
-          },
-        ],
-      });
-
-      const analysis: Analysis = {
-        verdict: object.verdict,
-        scamType: object.scamType.slice(0, 80),
-        reasons: object.reasons.slice(0, 3).map((r) => r.slice(0, 300)),
-        nextAction: object.nextAction.slice(0, 400),
-        // Belt & braces: scrub the model's summary again before it goes anywhere.
-        familyAlertSummary: redactSensitive(object.familyAlertSummary).slice(0, 500),
-      };
-      return NextResponse.json(analysis, { headers: { "X-Kavach-Engine": engine } });
-    } catch (error) {
-      console.error("[analyze] AI engine failed, falling back to rules:", error);
+    // Engine chain in priority order: each failure falls through to the next.
+    const attempts: Array<{ engine: "gemini" | "groq"; model: Parameters<typeof generateObject>[0]["model"] }> = [];
+    if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      const google = createGoogleGenerativeAI({ apiKey });
+      attempts.push({ engine: "gemini", model: google(process.env.GEMINI_MODEL ?? "gemini-2.5-flash") });
     }
+    if (process.env.GROQ_API_KEY && groqCanHandleThis) {
+      // supportsStructuredOutputs sends the zod schema as a native json_schema
+      // response format — required for exact schema compliance.
+      const groq = createOpenAICompatible({
+        name: "groq",
+        baseURL: "https://api.groq.com/openai/v1",
+        apiKey: process.env.GROQ_API_KEY,
+        supportsStructuredOutputs: true,
+      });
+      attempts.push({
+        engine: "groq",
+        model: groq(imageBase64 ? (groqVisionModel as string) : (process.env.GROQ_MODEL ?? "openai/gpt-oss-120b")),
+      });
+    }
+
+    if (attempts.length === 0) {
+      console.error("[analyze] no engine available for this input (screenshot without a vision model)");
+    }
+
+    for (const attempt of attempts) {
+      try {
+        const { object } = await generateObject({
+          model: attempt.model,
+          schema: AnalysisSchema,
+          system: SYSTEM_PROMPT.replace("<LANGUAGE>", LANGUAGE_INSTRUCTION[language]),
+          messages: [
+            {
+              role: "user",
+              content: [
+                ...(imageBase64
+                  ? [{ type: "image" as const, image: imageBase64 }]
+                  : []),
+                {
+                  type: "text" as const,
+                  text: imageBase64
+                    ? `Analyze this screenshot of a message. ${redactedText ? `Any accompanying text: "${redactedText}"` : ""}`
+                    : `Analyze this message: "${redactedText}"`,
+                },
+              ],
+            },
+          ],
+        });
+
+        const analysis: Analysis = {
+          verdict: object.verdict,
+          scamType: object.scamType.slice(0, 80),
+          reasons: object.reasons.slice(0, 3).map((r) => r.slice(0, 300)),
+          nextAction: object.nextAction.slice(0, 400),
+          // Belt & braces: scrub the model's summary again before it goes anywhere.
+          familyAlertSummary: redactSensitive(object.familyAlertSummary).slice(0, 500),
+        };
+        return NextResponse.json(analysis, { headers: { "X-Kavach-Engine": attempt.engine } });
+      } catch (error) {
+        console.error(`[analyze] ${attempt.engine} engine failed, trying next:`, error);
+      }
+    }
+    console.error("[analyze] all AI engines failed, falling back to rules");
   }
 
   // No API key (or Gemini failed): deterministic offline rules engine keeps the

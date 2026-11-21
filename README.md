@@ -23,15 +23,15 @@ Forward a suspicious SMS / WhatsApp message (or upload a screenshot) and Kavach 
 `POST /api/analyze` (see `app/api/analyze/route.ts`):
 
 1. Input text is **redacted first** — the model never sees live OTPs/PINs/account numbers.
-2. If `GROQ_API_KEY` is set, **Groq** (free tier, Llama 3.3 70B for text / Llama 4 Scout for screenshots, via the Vercel AI SDK `generateObject` + zod) returns a typed structured verdict. The model's alert summary is scrubbed again afterwards (belt & braces).
-3. Else, if `GEMINI_API_KEY` is set, the same pipeline runs on **Gemini** (`gemini-2.5-flash`, with vision for screenshots).
+2. If `GEMINI_API_KEY` is set, **Gemini** (`gemini-2.5-flash`, primary — vision-capable, so screenshots are analyzed) returns a typed structured verdict via the Vercel AI SDK `generateObject` + zod.
+3. Else, if `GROQ_API_KEY` is set, the same pipeline runs on **Groq** (`gpt-oss-120b`, structured outputs; text-only unless a vision model is configured).
 4. **No key? No problem.** A deterministic offline rules engine (`lib/heuristic.ts`) covers common Indian scam patterns so the prototype never breaks — evals stay deterministic too.
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.example .env.local   # add GROQ_API_KEY for AI-powered analysis (free at console.groq.com)
+cp .env.example .env.local   # add GEMINI_API_KEY (primary, aistudio.google.com) and/or GROQ_API_KEY (fallback)
 npm run dev
 ```
 
