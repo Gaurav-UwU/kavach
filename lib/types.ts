@@ -34,7 +34,6 @@ export type ChatMessage =
       engine: "gemini" | "heuristic";
       createdAt: number;
     }
-  | { id: string; role: "banner"; name: string; relation: string; summary: string; createdAt: number }
   | { id: string; role: "error"; text: string; createdAt: number }
   | { id: string; role: "kavach-note"; text: string; createdAt: number }
   | { id: string; role: "actions"; kind: "menu"; createdAt: number }

@@ -11,7 +11,6 @@ import VerdictCard from "./VerdictCard";
 import QuickChips from "./QuickChips";
 import InputBar, { type OutgoingMessage } from "./InputBar";
 import FamilyGuardModal from "./FamilyGuardModal";
-import AlertModal, { type AlertPreview } from "./AlertModal";
 import {
   ChevronDownIcon,
   DoubleCheckIcon,
@@ -56,7 +55,6 @@ export default function ChatApp() {
   const [analyzing, setAnalyzing] = useState(false);
   const [guard, setGuard] = useState<GuardContact | null>(null);
   const [guardOpen, setGuardOpen] = useState(false);
-  const [alertPreview, setAlertPreview] = useState<AlertPreview | null>(null);
   const [welcomeTime, setWelcomeTime] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -155,7 +153,6 @@ export default function ChatApp() {
     clearAllSettings();
     setGuard(null);
     setMessages([]);
-    setAlertPreview(null);
     setGuardOpen(false);
     setLanguage("English");
     setLanguageKnown(false);
@@ -190,19 +187,34 @@ export default function ChatApp() {
           },
         ]);
 
-        // Auto-Alert: on HIGH_RISK with the toggle ON, raise the family banner.
+        // Auto-Alert: on HIGH_RISK with the toggle ON, deliver the alert to the
+        // Family Guard automatically — no tap needed.
         if (analysis.verdict === "HIGH_RISK" && activeGuard.autoAlert) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: newId(),
-              role: "banner",
-              name: activeGuard.name,
-              relation: activeGuard.relation,
-              summary: analysis.familyAlertSummary,
-              createdAt: Date.now(),
-            },
-          ]);
+          const digits = normalizeIndianPhone(activeGuard.phone);
+          if (digits) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: newId(),
+                role: "alert-sent",
+                text: analysis.familyAlertSummary,
+                toName: activeGuard.name,
+                toRelation: activeGuard.relation,
+                phone: digits,
+                createdAt: Date.now(),
+              },
+            ]);
+          } else {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: newId(),
+                role: "kavach-note",
+                text: STRINGS[language].autoAlertNoContact,
+                createdAt: Date.now(),
+              },
+            ]);
+          }
         }
       } catch {
         setMessages((prev) => [
@@ -348,14 +360,6 @@ export default function ChatApp() {
       handleSend({ text: sample.text });
     },
     [handleSend],
-  );
-
-  const openAlert = useCallback(
-    (name: string, relation: string, summary: string) => {
-      const digits = normalizeIndianPhone(guard?.phone ?? "") ?? "";
-      setAlertPreview({ name, relation, phone: digits, summary });
-    },
-    [guard],
   );
 
   return (
@@ -694,23 +698,6 @@ export default function ChatApp() {
               );
             }
 
-            if (message.role === "banner") {
-              return (
-                <div key={message.id} className="wa-bubble flex justify-center py-1">
-                  <p className="max-w-[92%] text-center text-[12.5px] leading-snug text-[#54656F]">
-                    🛡️ {t.banner(message.name, message.relation)} —{" "}
-                    <button
-                      type="button"
-                      onClick={() => openAlert(message.name, message.relation, message.summary)}
-                      className="font-semibold text-[#027EB5] underline"
-                    >
-                      {t.viewAlert}
-                    </button>
-                  </p>
-                </div>
-              );
-            }
-
             return (
               <div key={message.id} className="flex">
                 <div className="wa-bubble rounded-lg bg-[#FFE0DE] px-3 py-2 text-[15px] text-[#8B2F28] shadow-sm">
@@ -770,12 +757,6 @@ export default function ChatApp() {
           guard={guard ?? loadGuard()}
           onSave={handleSaveGuard}
           onClose={() => setGuardOpen(false)}
-        />
-        <AlertModal
-          open={alertPreview !== null}
-          language={language}
-          alert={alertPreview}
-          onClose={() => setAlertPreview(null)}
         />
       </div>
     </div>

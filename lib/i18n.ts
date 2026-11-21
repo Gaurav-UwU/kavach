@@ -27,8 +27,6 @@ export interface Strings {
   stopListening: string;
   sendToGuard: (name: string) => string;
   alertSentCaption: (name: string, relation: string, phone: string) => string;
-  banner: (name: string, relation: string) => string;
-  viewAlert: string;
   offlineNote: string;
 
   guardTitle: string;
@@ -40,12 +38,10 @@ export interface Strings {
   phoneError: string;
   savedNote: string;
 
-  alertModalTitle: string;
-  alertTo: string;
-  alertRedactedNote: string;
   close: string;
 
   errorGeneric: string;
+  autoAlertNoContact: string;
   onboardConfirm: string;
   changeLanguage: string;
   menuAsk: string;
@@ -86,8 +82,6 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "Stop",
     sendToGuard: (n) => `📤 Send this to ${n}`,
     alertSentCaption: (n, r, p) => `Sent to ${n} (${r}) · +91 ${p}`,
-    banner: (name, relation) => `Family Alert triggered for ${name} (${relation})`,
-    viewAlert: "View Alert",
     offlineNote: "Checked with Kavach's built-in safety rules (offline mode)",
 
     guardTitle: "Family Guard",
@@ -100,12 +94,11 @@ export const STRINGS: Record<Language, Strings> = {
     phoneError: "Please enter a valid 10-digit mobile number",
     savedNote: "Saved on this device",
 
-    alertModalTitle: "Family Alert Preview",
-    alertTo: "To",
-    alertRedactedNote: "OTPs, PINs and account numbers were removed automatically.",
     close: "Close",
 
     errorGeneric: "Sorry, Kavach could not check this right now. Please try again.",
+    autoAlertNoContact:
+      "⚠️ Auto-Alert is ON, but no Family Guard number is set. Open Family Guard settings to enable automatic alerts.",
     onboardConfirm:
       "Done! We'll chat in English from now on. 🛡️\nForward any suspicious message — or tap a sample below — and I'll check it for you.",
     changeLanguage: "Change language",
@@ -152,8 +145,6 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "रोकें",
     sendToGuard: (n) => `📤 यह ${n} को भेजें`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} को भेजा गया`,
-    banner: (name, relation) => `${name} (${relation}) के लिए फैमिली अलर्ट भेजा गया`,
-    viewAlert: "अलर्ट देखें",
     offlineNote: "कवच के बिल्ट-इन नियमों से जाँचा गया (ऑफ़लाइन मोड)",
 
     guardTitle: "फैमिली गार्ड",
@@ -166,12 +157,11 @@ export const STRINGS: Record<Language, Strings> = {
     phoneError: "कृपया सही 10 अंकों का मोबाइल नंबर डालें",
     savedNote: "इस डिवाइस पर सेव हो गया",
 
-    alertModalTitle: "फैमिली अलर्ट — झलक",
-    alertTo: "को",
-    alertRedactedNote: "OTP, PIN और अकाउंट नंबर अपने-आप हटा दिए गए हैं।",
     close: "बंद करें",
 
     errorGeneric: "माफ़ करें, कवच अभी यह जाँच नहीं कर पाया। कृपया फिर कोशिश करें।",
+    autoAlertNoContact:
+      "⚠️ ऑटो-अलर्ट चालू है, पर फैमिली गार्ड का नंबर सेट नहीं है। अपने-आप अलर्ट के लिए फैमिली गार्ड सेटिंग्स खोलें।",
     onboardConfirm:
       "हो गया! अब हम हिंदी में बात करेंगे। 🛡️\nकोई भी संदिग्ध संदेश भेजें — या नीचे नमूना आज़माएँ — मैं जाँच कर दूँगा।",
     changeLanguage: "भाषा बदलें",
@@ -218,8 +208,6 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "थांबा",
     sendToGuard: (n) => `📤 हे ${n} यांना पाठवा`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} यांना पाठवले`,
-    banner: (name, relation) => `${name} (${relation}) यांच्यासाठी फॅमिली अलर्ट पाठवला गेला`,
-    viewAlert: "अलर्ट पहा",
     offlineNote: "कवचच्या अंतर्गत नियमांद्वारे तपासले गेले (ऑफलाइन मोड)",
 
     guardTitle: "फॅमिली गार्ड",
@@ -232,12 +220,11 @@ export const STRINGS: Record<Language, Strings> = {
     phoneError: "कृपया योग्य 10 अंकी मोबाइल क्रमांक टाका",
     savedNote: "या डिव्हाइसवर सेव्ह झाले",
 
-    alertModalTitle: "फॅमिली अलर्ट — झलक",
-    alertTo: "प्रति",
-    alertRedactedNote: "OTP, PIN आणि खाते क्रमांक आपोआप काढले गेले आहेत.",
     close: "बंद करा",
 
     errorGeneric: "क्षमस्व, कवच आत्ता हे तपासू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
+    autoAlertNoContact:
+      "⚠️ ऑटो-अलर्ट चालू आहे, पण फॅमिली गार्डचा नंबर सेट नाही. आपोआप अलर्टसाठी फॅमिली गार्ड सेटिंग्ज उघडा.",
     onboardConfirm:
       "झाले! आता आपण मराठीत बोलू. 🛡️\nकोणताही संशयास्पद संदेश पाठवा — किंवा खालील नमुना पाहा — मी तपासतो.",
     changeLanguage: "भाषा बदला",
@@ -284,8 +271,6 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "Rokein",
     sendToGuard: (n) => `📤 Ye ${n} ko bhejo`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} ko bheja`,
-    banner: (name, relation) => `${name} (${relation}) ke liye Family Alert trigger ho gaya`,
-    viewAlert: "Alert dekho",
     offlineNote: "Kavach ke built-in rules se check kiya gaya (offline mode)",
 
     guardTitle: "Family Guard",
@@ -298,12 +283,11 @@ export const STRINGS: Record<Language, Strings> = {
     phoneError: "Sahi 10 digit ka mobile number daalo",
     savedNote: "Is device par save ho gaya",
 
-    alertModalTitle: "Family Alert — jhalak",
-    alertTo: "Ko",
-    alertRedactedNote: "OTP, PIN aur account number apne-aap hata diye gaye hain.",
     close: "Band karo",
 
     errorGeneric: "Maaf karo, Kavach abhi ye check nahi kar paya. Phir se try karo.",
+    autoAlertNoContact:
+      "⚠️ Auto-Alert ON hai, par Family Guard ka number set nahi hai. Apne-aap alert ke liye Family Guard settings kholo.",
     onboardConfirm:
       "Ho gaya! Ab hum Hinglish mein baat karenge. 🛡️\nKoi bhi suspicious message bhejo — ya neeche sample try karo — main check kar dunga.",
     changeLanguage: "Language badlo",
