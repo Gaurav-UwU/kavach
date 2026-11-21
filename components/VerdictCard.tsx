@@ -18,6 +18,9 @@ interface VerdictCardProps {
   onSendAlert: (familyAlertSummary: string) => void;
 }
 
+const SANCHAR_SAATHI_URL = "https://sancharsaathi.gov.in";
+const CYBER_HELPLINE = "tel:1930";
+
 /**
  * A Kavach verdict rendered the way an official WhatsApp Business bot would send
  * it (Cloud API "interactive message"): a plain-text bubble using WhatsApp's own
@@ -104,6 +107,27 @@ export default function VerdictCard({
               {t.sendToGuard(guard.name)}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Official reporting actions — HIGH_RISK only, side by side.
+          Chakshu (Sanchar Saathi) portal + 1930 cyber-helpline dialer. */}
+      {analysis.verdict === "HIGH_RISK" && (
+        <div className="mt-1 grid grid-cols-2 gap-1">
+          <a
+            href={SANCHAR_SAATHI_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg bg-white py-2.5 text-center text-[14px] font-medium leading-tight text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
+          >
+            {t.reportChakshu}
+          </a>
+          <a
+            href={CYBER_HELPLINE}
+            className="rounded-lg bg-white py-2.5 text-center text-[14px] font-medium leading-tight text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
+          >
+            {t.call1930}
+          </a>
         </div>
       )}
 

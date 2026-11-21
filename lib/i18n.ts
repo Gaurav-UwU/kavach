@@ -27,6 +27,8 @@ export interface Strings {
   stopListening: string;
   sendToGuard: (name: string) => string;
   alertSentCaption: (name: string, relation: string, phone: string) => string;
+  reportChakshu: string;
+  call1930: string;
   offlineNote: string;
 
   guardTitle: string;
@@ -82,6 +84,8 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "Stop",
     sendToGuard: (n) => `📤 Send this to ${n}`,
     alertSentCaption: (n, r, p) => `Sent to ${n} (${r}) · +91 ${p}`,
+    reportChakshu: "🌐 Report on Chakshu",
+    call1930: "📞 Call 1930",
     offlineNote: "Checked with Kavach's built-in safety rules (offline mode)",
 
     guardTitle: "Family Guard",
@@ -145,6 +149,8 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "रोकें",
     sendToGuard: (n) => `📤 यह ${n} को भेजें`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} को भेजा गया`,
+    reportChakshu: "🌐 Chakshu पर रिपोर्ट करें",
+    call1930: "📞 1930 कॉल करें",
     offlineNote: "कवच के बिल्ट-इन नियमों से जाँचा गया (ऑफ़लाइन मोड)",
 
     guardTitle: "फैमिली गार्ड",
@@ -208,6 +214,8 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "थांबा",
     sendToGuard: (n) => `📤 हे ${n} यांना पाठवा`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} यांना पाठवले`,
+    reportChakshu: "🌐 Chakshu वर रिपोर्ट करा",
+    call1930: "📞 1930 कॉल करा",
     offlineNote: "कवचच्या अंतर्गत नियमांद्वारे तपासले गेले (ऑफलाइन मोड)",
 
     guardTitle: "फॅमिली गार्ड",
@@ -271,6 +279,8 @@ export const STRINGS: Record<Language, Strings> = {
     stopListening: "Rokein",
     sendToGuard: (n) => `📤 Ye ${n} ko bhejo`,
     alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} ko bheja`,
+    reportChakshu: "🌐 Chakshu pe report karo",
+    call1930: "📞 1930 dial karo",
     offlineNote: "Kavach ke built-in rules se check kiya gaya (offline mode)",
 
     guardTitle: "Family Guard",
