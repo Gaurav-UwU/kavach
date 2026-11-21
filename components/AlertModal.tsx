@@ -2,7 +2,6 @@
 
 import type { Language } from "@/lib/types";
 import { STRINGS } from "@/lib/i18n";
-import { buildWaMeLink } from "@/lib/guard";
 
 export interface AlertPreview {
   name: string;
@@ -21,11 +20,6 @@ interface AlertModalProps {
 export default function AlertModal({ open, language, alert, onClose }: AlertModalProps) {
   const t = STRINGS[language];
   if (!open || !alert) return null;
-
-  const link = buildWaMeLink(
-    { name: alert.name, relation: alert.relation, phone: alert.phone, autoAlert: false },
-    alert.summary,
-  );
 
   return (
     <div
@@ -61,23 +55,13 @@ export default function AlertModal({ open, language, alert, onClose }: AlertModa
 
         <p className="mb-4 text-xs text-gray-500">🔒 {t.alertRedactedNote}</p>
 
-        <div className="flex gap-2">
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 rounded-full bg-[#25D366] py-2.5 text-center text-[15px] font-semibold text-[#07341c] transition-colors hover:bg-[#1fb959]"
-          >
-            📲 {t.openWhatsapp}
-          </a>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-gray-300 px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50"
-          >
-            {t.close}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full rounded-full border border-gray-300 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {t.close}
+        </button>
       </div>
     </div>
   );

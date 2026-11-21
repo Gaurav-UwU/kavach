@@ -81,19 +81,3 @@ export function normalizeIndianPhone(raw: string): string | null {
   const final = trimmed.length === 11 && trimmed.startsWith("0") ? trimmed.slice(1) : trimmed;
   return /^[6-9]\d{9}$/.test(final) ? final : null;
 }
-
-/**
- * Builds the real WhatsApp Click-to-Chat handoff link:
- * https://wa.me/91<phone>?text=<encoded alert>
- */
-export function buildWaMeLink(contact: GuardContact, familyAlertSummary: string): string {
-  const waText = [
-    "🛡️ *Kavach Family Alert*",
-    "",
-    familyAlertSummary,
-    "",
-    "Please call your parent and guide them calmly.",
-    "Never share OTPs. Report scams on Chakshu (sancharsaathi.gov.in). If money was sent, call 1930.",
-  ].join("\n");
-  return `https://wa.me/91${contact.phone}?text=${encodeURIComponent(waText)}`;
-}

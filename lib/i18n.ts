@@ -25,7 +25,8 @@ export interface Strings {
   doNow: string;
   listen: string;
   stopListening: string;
-  sendAlert: string;
+  sendToGuard: (name: string) => string;
+  alertSentCaption: (name: string, relation: string, phone: string) => string;
   banner: (name: string, relation: string) => string;
   viewAlert: string;
   offlineNote: string;
@@ -42,7 +43,6 @@ export interface Strings {
   alertModalTitle: string;
   alertTo: string;
   alertRedactedNote: string;
-  openWhatsapp: string;
   close: string;
 
   errorGeneric: string;
@@ -84,7 +84,8 @@ export const STRINGS: Record<Language, Strings> = {
     doNow: "What to do now",
     listen: "Listen",
     stopListening: "Stop",
-    sendAlert: "Send Alert on WhatsApp",
+    sendToGuard: (n) => `📤 Send this to ${n}`,
+    alertSentCaption: (n, r, p) => `Sent to ${n} (${r}) · +91 ${p}`,
     banner: (name, relation) => `Family Alert triggered for ${name} (${relation})`,
     viewAlert: "View Alert",
     offlineNote: "Checked with Kavach's built-in safety rules (offline mode)",
@@ -102,7 +103,6 @@ export const STRINGS: Record<Language, Strings> = {
     alertModalTitle: "Family Alert Preview",
     alertTo: "To",
     alertRedactedNote: "OTPs, PINs and account numbers were removed automatically.",
-    openWhatsapp: "Open WhatsApp",
     close: "Close",
 
     errorGeneric: "Sorry, Kavach could not check this right now. Please try again.",
@@ -150,7 +150,8 @@ export const STRINGS: Record<Language, Strings> = {
     doNow: "अब क्या करें",
     listen: "सुनें",
     stopListening: "रोकें",
-    sendAlert: "WhatsApp पर अलर्ट भेजें",
+    sendToGuard: (n) => `📤 यह ${n} को भेजें`,
+    alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} को भेजा गया`,
     banner: (name, relation) => `${name} (${relation}) के लिए फैमिली अलर्ट भेजा गया`,
     viewAlert: "अलर्ट देखें",
     offlineNote: "कवच के बिल्ट-इन नियमों से जाँचा गया (ऑफ़लाइन मोड)",
@@ -168,7 +169,6 @@ export const STRINGS: Record<Language, Strings> = {
     alertModalTitle: "फैमिली अलर्ट — झलक",
     alertTo: "को",
     alertRedactedNote: "OTP, PIN और अकाउंट नंबर अपने-आप हटा दिए गए हैं।",
-    openWhatsapp: "WhatsApp खोलें",
     close: "बंद करें",
 
     errorGeneric: "माफ़ करें, कवच अभी यह जाँच नहीं कर पाया। कृपया फिर कोशिश करें।",
@@ -216,7 +216,8 @@ export const STRINGS: Record<Language, Strings> = {
     doNow: "आता काय करावे",
     listen: "ऐका",
     stopListening: "थांबा",
-    sendAlert: "WhatsApp वर अलर्ट पाठवा",
+    sendToGuard: (n) => `📤 हे ${n} यांना पाठवा`,
+    alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} यांना पाठवले`,
     banner: (name, relation) => `${name} (${relation}) यांच्यासाठी फॅमिली अलर्ट पाठवला गेला`,
     viewAlert: "अलर्ट पहा",
     offlineNote: "कवचच्या अंतर्गत नियमांद्वारे तपासले गेले (ऑफलाइन मोड)",
@@ -234,7 +235,6 @@ export const STRINGS: Record<Language, Strings> = {
     alertModalTitle: "फॅमिली अलर्ट — झलक",
     alertTo: "प्रति",
     alertRedactedNote: "OTP, PIN आणि खाते क्रमांक आपोआप काढले गेले आहेत.",
-    openWhatsapp: "WhatsApp उघडा",
     close: "बंद करा",
 
     errorGeneric: "क्षमस्व, कवच आत्ता हे तपासू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
@@ -282,7 +282,8 @@ export const STRINGS: Record<Language, Strings> = {
     doNow: "Ab kya karein",
     listen: "Sunaiye",
     stopListening: "Rokein",
-    sendAlert: "WhatsApp pe Alert bhejo",
+    sendToGuard: (n) => `📤 Ye ${n} ko bhejo`,
+    alertSentCaption: (n, r, p) => `${n} (${r}) · +91 ${p} ko bheja`,
     banner: (name, relation) => `${name} (${relation}) ke liye Family Alert trigger ho gaya`,
     viewAlert: "Alert dekho",
     offlineNote: "Kavach ke built-in rules se check kiya gaya (offline mode)",
@@ -300,7 +301,6 @@ export const STRINGS: Record<Language, Strings> = {
     alertModalTitle: "Family Alert — jhalak",
     alertTo: "Ko",
     alertRedactedNote: "OTP, PIN aur account number apne-aap hata diye gaye hain.",
-    openWhatsapp: "WhatsApp kholo",
     close: "Band karo",
 
     errorGeneric: "Maaf karo, Kavach abhi ye check nahi kar paya. Phir se try karo.",

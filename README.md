@@ -13,7 +13,7 @@ Forward a suspicious SMS / WhatsApp message (or upload a screenshot) and Kavach 
 - 🔊 **Listen** button (browser Web Speech API, `en-IN` / `hi-IN` voices)
 - **Family Guard**: one trusted contact (Name, Relation, 10-digit phone, Auto-Alert toggle) stored in `localStorage`
 - **Auto-Alert**: on HIGH_RISK verdicts with Auto-Alert ON, a Family Alert banner appears with a preview of the exact message sent to the child
-- Real `wa.me` Click-to-Chat handoff links
+- **One-tap Send to guardian**: the redacted alert is delivered into the conversation as an outgoing message (simulated in-chat handoff — no external app jump, no real numbers contacted)
 - **Automatic redaction**: OTPs (4–6 digits), PINs and account/card numbers become `[REDACTED]` before any family alert is generated
 - Official reporting refs: **Chakshu (Sanchar Saathi)** for suspicious messages, **1930** if money was already sent
 

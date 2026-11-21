@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Analysis, ChatMessage, GuardContact, Language } from "@/lib/types";
 import { LANGUAGES } from "@/lib/types";
 import { STRINGS } from "@/lib/i18n";
-import { loadGuard, saveGuard, normalizeIndianPhone, loadSavedLanguage, saveLanguage, clearAllSettings, isDefaultGuard, DEFAULT_GUARD } from "@/lib/guard";
+import { loadGuard, saveGuard, normalizeIndianPhone, loadSavedLanguage, saveLanguage, clearAllSettings, isDefaultGuard } from "@/lib/guard";
 import { stopSpeaking } from "@/lib/speech";
 import type { SampleMessage } from "@/lib/samples";
 import VerdictCard from "./VerdictCard";
@@ -214,6 +214,32 @@ export default function ChatApp() {
       }
     },
     [guard, language],
+  );
+
+  /** Delivers the redacted alert into the conversation as an outgoing message. */
+  const handleSendAlertToGuard = useCallback(
+    (summary: string) => {
+      const activeGuard = guard ?? loadGuard();
+      const digits = normalizeIndianPhone(activeGuard.phone);
+      if (!digits) {
+        // No valid contact yet — ask the user to set one up first.
+        setGuardOpen(true);
+        return;
+      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: newId(),
+          role: "alert-sent",
+          text: summary,
+          toName: activeGuard.name,
+          toRelation: activeGuard.relation,
+          phone: digits,
+          createdAt: Date.now(),
+        },
+      ]);
+    },
+    [guard],
   );
 
   /** Records the language choice as a natural chat exchange, then confirms in that language. */
@@ -555,8 +581,27 @@ export default function ChatApp() {
                     engine={message.engine}
                     guard={guard ?? loadGuard()}
                     time={formatTime(message.createdAt)}
-                    onFixGuard={() => setGuardOpen(true)}
+                    onSendAlert={handleSendAlertToGuard}
                   />
+                </div>
+              );
+            }
+
+            if (message.role === "alert-sent") {
+              return (
+                <div key={message.id} className="flex justify-end">
+                  <div className="wa-out wa-bubble max-w-[85%] rounded-lg rounded-tr-none bg-[#D9FDD3] px-2.5 py-1.5 shadow-sm">
+                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-gray-900">
+                      {message.text}
+                    </p>
+                    <p className="mt-1 text-[11px] font-medium text-[#667781]">
+                      🛡️ {t.alertSentCaption(message.toName, message.toRelation, message.phone)}
+                    </p>
+                    <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
+                      {formatTime(message.createdAt)}
+                      <DoubleCheckIcon className="h-3 w-[18px]" />
+                    </p>
+                  </div>
                 </div>
               );
             }

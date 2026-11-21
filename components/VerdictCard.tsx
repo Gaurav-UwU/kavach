@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { Analysis, GuardContact, Language } from "@/lib/types";
 import { STRINGS, VERDICT_DOT } from "@/lib/i18n";
 import { speak, stopSpeaking } from "@/lib/speech";
-import { buildWaMeLink, normalizeIndianPhone } from "@/lib/guard";
 
 interface VerdictCardProps {
   analysis: Analysis;
@@ -13,8 +12,8 @@ interface VerdictCardProps {
   engine: "gemini" | "heuristic";
   guard: GuardContact;
   time: string;
-  /** Called when the trusted contact has no valid phone and must be fixed first. */
-  onFixGuard: () => void;
+  /** Delivers the redacted alert into the conversation (simulated send). */
+  onSendAlert: (familyAlertSummary: string) => void;
 }
 
 /**
@@ -30,7 +29,7 @@ export default function VerdictCard({
   engine,
   guard,
   time,
-  onFixGuard,
+  onSendAlert,
 }: VerdictCardProps) {
   const t = STRINGS[lang];
   const [speaking, setSpeaking] = useState(false);
@@ -53,16 +52,7 @@ export default function VerdictCard({
   };
 
   const handleSendAlert = () => {
-    const digits = normalizeIndianPhone(guard.phone);
-    if (!digits) {
-      onFixGuard();
-      return;
-    }
-    window.open(
-      buildWaMeLink({ ...guard, phone: digits }, analysis.familyAlertSummary),
-      "_blank",
-      "noopener,noreferrer",
-    );
+    onSendAlert(analysis.familyAlertSummary);
   };
 
   const showActions = analysis.verdict !== "LIKELY_SAFE";
@@ -101,7 +91,7 @@ export default function VerdictCard({
             onClick={handleSendAlert}
             className="w-full rounded-lg bg-white py-2.5 text-center text-[15px] font-medium text-[#00A5F4] shadow-sm transition-colors hover:bg-[#F0F2F5]"
           >
-            📲 {t.sendAlert}
+            {t.sendToGuard(guard.name)}
           </button>
         </div>
       )}

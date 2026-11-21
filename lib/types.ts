@@ -46,4 +46,13 @@ export type ChatMessage =
       relation: string;
       phone: string;
       createdAt: number;
+    }
+  | {
+      id: string;
+      role: "alert-sent";
+      text: string;
+      toName: string;
+      toRelation: string;
+      phone: string;
+      createdAt: number;
     };
