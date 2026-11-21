@@ -31,7 +31,7 @@ export type ChatMessage =
       role: "kavach";
       analysis: Analysis;
       lang: Language;
-      engine: "gemini" | "heuristic";
+      engine: "gemini" | "groq" | "heuristic";
       /** True once the alert has been delivered to the Family Guard (auto or manual). */
       alertDelivered?: boolean;
       createdAt: number;

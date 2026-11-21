@@ -9,7 +9,7 @@ interface VerdictCardProps {
   analysis: Analysis;
   /** Language the analysis was generated in (drives voice + labels). */
   lang: Language;
-  engine: "gemini" | "heuristic";
+  engine: "gemini" | "groq" | "heuristic";
   guard: GuardContact;
   time: string;
   /** True once the alert has been delivered — hides the manual send button. */

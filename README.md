@@ -23,14 +23,15 @@ Forward a suspicious SMS / WhatsApp message (or upload a screenshot) and Kavach 
 `POST /api/analyze` (see `app/api/analyze/route.ts`):
 
 1. Input text is **redacted first** — the model never sees live OTPs/PINs/account numbers.
-2. If `GEMINI_API_KEY` is set, Gemini (`gemini-2.5-flash` via the Vercel AI SDK `generateObject` + zod) returns a typed structured verdict. The model's alert summary is scrubbed again afterwards (belt & braces).
-3. **No key? No problem.** A deterministic offline rules engine (`lib/heuristic.ts`) covers common Indian scam patterns so the prototype never breaks — evals stay deterministic too.
+2. If `GROQ_API_KEY` is set, **Groq** (free tier, Llama 3.3 70B for text / Llama 4 Scout for screenshots, via the Vercel AI SDK `generateObject` + zod) returns a typed structured verdict. The model's alert summary is scrubbed again afterwards (belt & braces).
+3. Else, if `GEMINI_API_KEY` is set, the same pipeline runs on **Gemini** (`gemini-2.5-flash`, with vision for screenshots).
+4. **No key? No problem.** A deterministic offline rules engine (`lib/heuristic.ts`) covers common Indian scam patterns so the prototype never breaks — evals stay deterministic too.
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.example .env.local   # optional: add GEMINI_API_KEY for AI-powered analysis
+cp .env.example .env.local   # add GROQ_API_KEY for AI-powered analysis (free at console.groq.com)
 npm run dev
 ```
 
@@ -51,7 +52,7 @@ EVAL_BASE_URL=https://your-app.vercel.app npm run eval
 
 1. Push this folder to a GitHub repo.
 2. [vercel.com/new](https://vercel.com/new) → import the repo (framework auto-detects Next.js).
-3. Add env var `GEMINI_API_KEY` in Project → Settings → Environment Variables (optional — the app works without it).
+3. Add env var `GROQ_API_KEY` in Project → Settings → Environment Variables (free key at console.groq.com — the app works without it too).
 4. Deploy. Share the URL.
 
 ## Scope (v1)

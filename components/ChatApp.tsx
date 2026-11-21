@@ -180,8 +180,11 @@ export default function ChatApp() {
           body: JSON.stringify({ ...payload, language }),
         });
         if (!response.ok) throw new Error(`API ${response.status}`);
-        const analysis = (await response.json()) as Analysis & { engine?: "gemini" | "heuristic" };
-        const engine = analysis.engine === "gemini" ? "gemini" : "heuristic";
+        const analysis = (await response.json()) as Analysis & {
+          engine?: "gemini" | "groq" | "heuristic";
+        };
+        const engine =
+          analysis.engine === "gemini" || analysis.engine === "groq" ? analysis.engine : "heuristic";
 
         // Auto-Alert: on HIGH_RISK with the toggle ON, deliver the alert to the
         // Family Guard automatically — no tap needed.

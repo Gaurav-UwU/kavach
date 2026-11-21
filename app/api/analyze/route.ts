@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { z } from "zod";
 import { redactSensitive } from "@/lib/redact";
 import { analyzeWithRules } from "@/lib/heuristic";
@@ -48,7 +49,11 @@ Writing rules:
 - reasons: 2-3 bullets explaining WHY in plain language an elder can understand.
 - nextAction: exactly ONE calm sentence telling them what to do now. For HIGH_RISK it must mention reporting on Chakshu (Sanchar Saathi) and, if money was already sent, calling 1930 immediately.
 - familyAlertSummary: at most 2 lines addressed to the user's child describing what the message claimed and the verdict. NEVER include any OTP, PIN, or full account/card number — write [REDACTED] instead. Never invent numbers that were not in the original message.
-- Be humble about certainty: say "looks like" when unsure. Never claim to be an official bank or government service.`;
+- Be humble about certainty: say "looks like" when unsure. Never claim to be an official bank or government service.
+
+Respond ONLY with one valid JSON object, exactly in this shape (all five keys, in this order):
+{"verdict":"HIGH_RISK","scamType":"<short label>","reasons":["<bullet 1>","<bullet 2>"],"nextAction":"<one calm sentence>","familyAlertSummary":"<max 2 lines>"}
+The "verdict" key must be exactly one of: "HIGH_RISK", "CAUTION", "LIKELY_SAFE". Never omit any key.`;
 
 export async function POST(request: Request) {
   let body: { text?: unknown; imageBase64?: unknown; language?: unknown };
@@ -76,12 +81,39 @@ export async function POST(request: Request) {
   const text = rawText.slice(0, 4000);
   const redactedText = text ? redactSensitive(text) : "";
 
-  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY ?? process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
   if (apiKey) {
     try {
-      const google = createGoogleGenerativeAI({ apiKey });
-      const model = google(process.env.GEMINI_MODEL ?? "gemini-2.5-flash");
+      let engine: "groq" | "gemini";
+      let model: Parameters<typeof generateObject>[0]["model"];
+
+      const groqVisionModel = process.env.GROQ_VISION_MODEL;
+
+      if (process.env.GROQ_API_KEY && (!imageBase64 || groqVisionModel)) {
+        // Primary engine: Groq (OpenAI-compatible, free tier).
+        // supportsStructuredOutputs sends the zod schema as a native json_schema
+        // response format — required for exact schema compliance.
+        // Screenshots need a vision-capable model; without one they fall through.
+        const groq = createOpenAICompatible({
+          name: "groq",
+          baseURL: "https://api.groq.com/openai/v1",
+          apiKey: process.env.GROQ_API_KEY,
+          supportsStructuredOutputs: true,
+        });
+        engine = "groq";
+        model = groq(
+          imageBase64 ? (groqVisionModel as string) : (process.env.GROQ_MODEL ?? "openai/gpt-oss-120b"),
+        );
+      } else if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+        // Fallback engine: Gemini (only when no Groq key is configured).
+        const google = createGoogleGenerativeAI({ apiKey });
+        engine = "gemini";
+        model = google(process.env.GEMINI_MODEL ?? "gemini-2.5-flash");
+      } else {
+        // Groq key exists but this is a screenshot and no vision model is set.
+        throw new Error("no vision-capable engine available for image analysis");
+      }
 
       const { object } = await generateObject({
         model,
@@ -113,9 +145,9 @@ export async function POST(request: Request) {
         // Belt & braces: scrub the model's summary again before it goes anywhere.
         familyAlertSummary: redactSensitive(object.familyAlertSummary).slice(0, 500),
       };
-      return NextResponse.json(analysis, { headers: { "X-Kavach-Engine": "gemini" } });
+      return NextResponse.json(analysis, { headers: { "X-Kavach-Engine": engine } });
     } catch (error) {
-      console.error("[analyze] Gemini failed, falling back to rules:", error);
+      console.error("[analyze] AI engine failed, falling back to rules:", error);
     }
   }
 
