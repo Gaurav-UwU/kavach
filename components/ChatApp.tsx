@@ -397,7 +397,7 @@ export default function ChatApp() {
             <span>{welcomeTime !== null && formatClock(welcomeTime)}</span>
             <StatusIcons />
           </div>
-          <div aria-hidden className="absolute left-1/2 top-[6px] z-40 hidden h-4 w-4 -translate-x-1/2 rounded-full bg-[#17171a] sm:block" />
+          <div aria-hidden className="absolute left-1/2 top-[7px] z-40 hidden h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-[#17171a] sm:block" />
 
           {/* Top header */}
         <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 pb-2 pt-safe text-white">
@@ -495,7 +495,7 @@ export default function ChatApp() {
         <main
           ref={mainRef}
           onScroll={handleScroll}
-          className="chat-pattern relative flex-1 space-y-2 overflow-y-auto px-3 py-3"
+          className="chat-pattern no-scrollbar relative flex-1 space-y-2 overflow-y-auto px-3 py-3"
         >
           {/* Date chip */}
           <div className="flex justify-center pb-1">
