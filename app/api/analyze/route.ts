@@ -23,12 +23,14 @@ const AnalysisSchema = z.object({
   ),
 });
 
-const LANGUAGES: Language[] = ["English", "Hindi", "Hinglish"];
+const LANGUAGES: Language[] = ["English", "Hindi", "Marathi", "Hinglish"];
 
 const LANGUAGE_INSTRUCTION: Record<Language, string> = {
   English: "simple English — short sentences, zero technical jargon",
   Hindi:
     "easy Hindi in Devanagari script (सरल हिंदी) — no English jargon except brand names like SBI, UPI, OTP",
+  Marathi:
+    "easy Marathi in Devanagari script (सोपी मराठी) — no English jargon except brand names like SBI, UPI, OTP",
   Hinglish:
     "natural Hinglish — Hindi written in Roman script mixed with common English words (jaise 'account', 'click')",
 };

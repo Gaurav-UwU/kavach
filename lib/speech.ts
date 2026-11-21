@@ -12,8 +12,9 @@ export function speak(text: string, language: Language): boolean {
 
   const utterance = new SpeechSynthesisUtterance(text);
   // Hinglish is Hindi written in Roman script; an en-IN voice handles the
-  // code-mixed pronunciation reasonably well, hi-IN for pure Hindi.
-  utterance.lang = language === "Hindi" ? "hi-IN" : "en-IN";
+  // code-mixed pronunciation reasonably well.
+  utterance.lang =
+    language === "Hindi" ? "hi-IN" : language === "Marathi" ? "mr-IN" : "en-IN";
   utterance.rate = 0.95; // slightly slower for seniors
   utterance.pitch = 1;
 

@@ -1,8 +1,8 @@
 export type Verdict = "HIGH_RISK" | "CAUTION" | "LIKELY_SAFE";
 
-export type Language = "English" | "Hindi" | "Hinglish";
+export type Language = "English" | "Hindi" | "Marathi" | "Hinglish";
 
-export const LANGUAGES: Language[] = ["English", "Hindi", "Hinglish"];
+export const LANGUAGES: Language[] = ["English", "Hindi", "Marathi", "Hinglish"];
 
 export interface Analysis {
   verdict: Verdict;

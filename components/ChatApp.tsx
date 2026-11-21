@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Analysis, ChatMessage, GuardContact, Language } from "@/lib/types";
 import { LANGUAGES } from "@/lib/types";
 import { STRINGS } from "@/lib/i18n";
-import { loadGuard, saveGuard, normalizeIndianPhone } from "@/lib/guard";
+import { loadGuard, saveGuard, normalizeIndianPhone, loadSavedLanguage, saveLanguage, clearAllSettings } from "@/lib/guard";
 import { stopSpeaking } from "@/lib/speech";
 import type { SampleMessage } from "@/lib/samples";
 import VerdictCard from "./VerdictCard";
@@ -12,10 +12,12 @@ import QuickChips from "./QuickChips";
 import InputBar, { type OutgoingMessage } from "./InputBar";
 import FamilyGuardModal from "./FamilyGuardModal";
 import AlertModal, { type AlertPreview } from "./AlertModal";
+import LanguageGate from "./LanguageGate";
 import {
   ChevronDownIcon,
   DoubleCheckIcon,
   DotsVerticalIcon,
+  RestartIcon,
   ShieldAvatar,
   ShieldIcon,
   TrashIcon,
@@ -41,16 +43,32 @@ export default function ChatApp() {
   const [welcomeTime, setWelcomeTime] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  /** null = still loading prefs; true = show language gate; false = chat */
+  const [gateOpen, setGateOpen] = useState<boolean | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
 
   const t = STRINGS[language];
 
-  // Restore Family Guard settings from localStorage on mount.
+  // Restore saved language (or show the first-run gate) + Family Guard settings.
   useEffect(() => {
+    const saved = loadSavedLanguage();
+    if (saved) {
+      setLanguage(saved);
+      setGateOpen(false);
+    } else {
+      setGateOpen(true);
+    }
     setGuard(loadGuard());
     setWelcomeTime(Date.now());
     return () => stopSpeaking();
+  }, []);
+
+  const handleSelectLanguage = useCallback((lang: Language) => {
+    setLanguage(lang);
+    saveLanguage(lang);
+    setWelcomeTime(Date.now());
+    setGateOpen(false);
   }, []);
 
   // Keep the chat scrolled to the newest message.
@@ -79,6 +97,18 @@ export default function ChatApp() {
     stopSpeaking();
     setMessages([]);
     setWelcomeTime(Date.now());
+  }, []);
+
+  /** Full reset: wipe chat, Family Guard and the language choice, then re-run onboarding. */
+  const handleReset = useCallback(() => {
+    setMenuOpen(false);
+    stopSpeaking();
+    clearAllSettings();
+    setGuard(null);
+    setMessages([]);
+    setAlertPreview(null);
+    setGuardOpen(false);
+    setGateOpen(true);
   }, []);
 
   const analyze = useCallback(
@@ -168,6 +198,10 @@ export default function ChatApp() {
   return (
     <div className="flex min-h-dvh items-stretch justify-center bg-[#0b141a] sm:p-6">
       <div className="relative flex h-dvh w-full max-w-md flex-col overflow-hidden bg-[#EFE7DE] shadow-2xl sm:h-[calc(100dvh-3rem)] sm:rounded-xl">
+        {gateOpen === true && <LanguageGate onSelect={handleSelectLanguage} />}
+
+        {gateOpen === false && (
+          <>
         {/* Top header */}
         <header className="relative z-30 flex items-center gap-2.5 bg-[#075E54] px-3 py-2 text-white">
           <ShieldAvatar className="h-10 w-10 shrink-0" />
@@ -220,6 +254,14 @@ export default function ChatApp() {
                   <TrashIcon className="h-5 w-5 text-[#54656F]" />
                   {t.clearChat}
                 </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[15px] text-[#3B4A54] hover:bg-[#F5F6F6]"
+                >
+                  <RestartIcon className="h-5 w-5 text-[#54656F]" />
+                  {t.reset}
+                </button>
               </div>
             </>
           )}
@@ -231,7 +273,10 @@ export default function ChatApp() {
             <button
               key={lang}
               type="button"
-              onClick={() => setLanguage(lang)}
+              onClick={() => {
+                setLanguage(lang);
+                saveLanguage(lang);
+              }}
               className={`rounded-full px-3 py-1 text-[13px] font-semibold transition-colors ${
                 language === lang
                   ? "bg-white text-[#075E54]"
@@ -374,6 +419,8 @@ export default function ChatApp() {
         <InputBar language={language} disabled={analyzing} onSend={handleSend} onNotice={(msg) =>
           setMessages((prev) => [...prev, { id: newId(), role: "error", text: msg, createdAt: Date.now() }])
         } />
+          </>
+        )}
 
         <FamilyGuardModal
           open={guardOpen}

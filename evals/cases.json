@@ -73,6 +73,14 @@
       "mustContainDevanagari": true
     },
     {
+      "id": "marathi-electricity",
+      "why": "Utility scam in Marathi — must answer in Marathi (Devanagari)",
+      "language": "Marathi",
+      "text": "वीज पुरवठा आज रात्री 9:30 वाजता तोडला जाईल. त्वरित अधिकारी 9876543210 यांना कॉल करा.",
+      "expected": "HIGH_RISK",
+      "mustContainDevanagari": true
+    },
+    {
       "id": "hinglish-kyc",
       "why": "Code-mixed message common among real users",
       "language": "Hinglish",

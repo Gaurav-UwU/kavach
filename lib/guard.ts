@@ -1,6 +1,7 @@
-import type { GuardContact } from "./types";
+import type { GuardContact, Language } from "./types";
 
 const STORAGE_KEY = "kavach.guard.v1";
+const LANGUAGE_KEY = "kavach.language.v1";
 
 /** Pre-filled default per spec — editable, stored in localStorage. */
 export const DEFAULT_GUARD: GuardContact = {
@@ -38,6 +39,27 @@ export function loadGuard(): GuardContact {
 export function saveGuard(contact: GuardContact): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
+}
+
+/** Chosen language persists across visits ("set for further communications"). */
+export function loadSavedLanguage(): Language | null {
+  if (typeof window === "undefined") return null;
+  const value = window.localStorage.getItem(LANGUAGE_KEY);
+  return value === "English" || value === "Hindi" || value === "Marathi" || value === "Hinglish"
+    ? value
+    : null;
+}
+
+export function saveLanguage(language: Language): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(LANGUAGE_KEY, language);
+}
+
+/** Full prototype reset: wipes language choice, Family Guard and any other prefs. */
+export function clearAllSettings(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(LANGUAGE_KEY);
+  window.localStorage.removeItem(STORAGE_KEY);
 }
 
 /**

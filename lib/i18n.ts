@@ -20,6 +20,7 @@ export interface Strings {
   menuLabel: string;
   guardSettings: string;
   clearChat: string;
+  reset: string;
   why: string;
   doNow: string;
   listen: string;
@@ -70,6 +71,7 @@ export const STRINGS: Record<Language, Strings> = {
     menuLabel: "Menu",
     guardSettings: "Family Guard settings",
     clearChat: "Clear chat",
+    reset: "Reset prototype",
     why: "Why?",
     doNow: "What to do now",
     listen: "Listen",
@@ -124,6 +126,7 @@ export const STRINGS: Record<Language, Strings> = {
     menuLabel: "मेनू",
     guardSettings: "फैमिली गार्ड सेटिंग्स",
     clearChat: "चैट साफ़ करें",
+    reset: "प्रोटोटाइप रीसेट करें",
     why: "क्यों?",
     doNow: "अब क्या करें",
     listen: "सुनें",
@@ -161,6 +164,61 @@ export const STRINGS: Record<Language, Strings> = {
     },
   },
 
+  Marathi: {
+    subtitle: "ऑनलाइन",
+    welcome:
+      "कोणताही संशयास्पद SMS, WhatsApp संदेश किंवा स्क्रीनशॉट क्लिक करण्यापूर्वी येथे पाठवा. साध्या शब्दांत सुरक्षित आहे की नाही ते मी सांगेन.",
+    disclaimer: "हे एक डेमो आहे. कृपया तुमच्या बँकेकडे किंवा कुटुंबाकडेही एकदा तपासा.",
+    chipsTitle: "नमुना संदेश पाठवून पहा",
+    inputPlaceholder: "संशयास्पद संदेश येथे पेस्ट करा...",
+    analyzing: "कवच हा संदेश तपासत आहे…",
+    today: "आज",
+    encryption:
+      "🔒 या डेमो चॅटमधील संदेश तुमच्या फोनबाहेर जात नाहीत. तपासणीसाठी पाठवलेला मजकूरच तपासला जातो.",
+    typing: "टाइप करत आहे…",
+    listening: "ऐकत आहे…",
+    voiceUnsupported: "या ब्राउझरमध्ये व्हॉइस इनपुट चालत नाही",
+    menuLabel: "मेनू",
+    guardSettings: "फॅमिली गार्ड सेटिंग्ज",
+    clearChat: "चॅट साफ करा",
+    reset: "प्रोटोटाइप रीसेट करा",
+    why: "का?",
+    doNow: "आता काय करावे",
+    listen: "ऐका",
+    stopListening: "थांबा",
+    sendAlert: "WhatsApp वर अलर्ट पाठवा",
+    banner: (name, relation) => `${name} (${relation}) यांच्यासाठी फॅमिली अलर्ट पाठवला गेला`,
+    viewAlert: "अलर्ट पहा",
+    offlineNote: "कवचच्या अंतर्गत नियमांद्वारे तपासले गेले (ऑफलाइन मोड)",
+
+    guardTitle: "फॅमिली गार्ड",
+    guardDesc:
+      "कवचला मोठा धोका आढळल्यास, तुमच्या विश्वासाच्या व्यक्तीला WhatsApp वर शांत अलर्ट पाठवू शकतो.",
+    fieldLabel: { name: "नाव", relation: "नाते", phone: "मोबाइल क्रमांक (10 अंकी)" },
+    relationOptions: ["मुलगा", "मुलगी", "नातू", "नात", "भाचा", "भाची", "इतर"],
+    autoAlertToggle: "मोठ्या धोक्यावर आपोआप अलर्ट पाठवा",
+    save: "सेव्ह करा",
+    phoneError: "कृपया योग्य 10 अंकी मोबाइल क्रमांक टाका",
+    savedNote: "या डिव्हाइसवर सेव्ह झाले",
+
+    alertModalTitle: "फॅमिली अलर्ट — झलक",
+    alertTo: "प्रति",
+    alertRedactedNote: "OTP, PIN आणि खाते क्रमांक आपोआप काढले गेले आहेत.",
+    openWhatsapp: "WhatsApp उघडा",
+    close: "बंद करा",
+
+    errorGeneric: "क्षमस्व, कवच आत्ता हे तपासू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
+    imgTooBig: "प्रतिमा 4 MB पेक्षा लहान असावी",
+    imgTypeBad: "फक्त PNG, JPG किंवा WebP प्रतिमा चालतील",
+    removeAttachment: "प्रतिमा काढा",
+
+    verdictLabel: {
+      HIGH_RISK: "उच्च-धोक्याची फसवणूक",
+      CAUTION: "सावध — आधी तपासा",
+      LIKELY_SAFE: "बहुधा सुरक्षित",
+    },
+  },
+
   Hinglish: {
     subtitle: "Online",
     welcome:
@@ -178,6 +236,7 @@ export const STRINGS: Record<Language, Strings> = {
     menuLabel: "Menu",
     guardSettings: "Family Guard settings",
     clearChat: "Chat clear karo",
+    reset: "Prototype reset karo",
     why: "Kyun?",
     doNow: "Ab kya karein",
     listen: "Sunaiye",
