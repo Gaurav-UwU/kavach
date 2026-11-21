@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: #0b141a;
+  font-family: var(--font-geist-sans), "Segoe UI", "Nirmala UI", Arial, sans-serif;
+}
+
+/* WhatsApp-style subtle doodle pattern behind the chat canvas */
+.chat-pattern {
+  background-color: #ece5dd;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23a8998a' stroke-opacity='0.14' stroke-width='2'%3E%3Ccircle cx='20' cy='24' r='7'/%3E%3Cpath d='M60 14h24v18H70l-6 6v-6h-4z'/%3E%3Cpath d='M14 70c8-10 16-10 24 0'/%3E%3Cpath d='M84 66l8 8m0-8l-8 8'/%3E%3Ccircle cx='100' cy='104' r='5'/%3E%3Cpath d='M44 96h20v14H44z'/%3E%3Cpath d='M48 100h12m-12 4h8'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Hide scrollbar on the quick-test chip row while keeping it scrollable */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

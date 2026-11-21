@@ -1,0 +1,91 @@
+{
+  "description": "Kavach /api/analyze eval suite. Run against a live server: EVAL_BASE_URL=http://localhost:3000 npm run eval",
+  "cases": [
+    {
+      "id": "electricity-impersonation",
+      "why": "Classic fake electricity-board pressure tactic with a personal mobile number",
+      "language": "English",
+      "text": "Dear customer your electricity power will be disconnected tonight 9:30 PM. Call officer 9876543210 immediately.",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "sbi-apk-malware",
+      "why": "Bank impersonation demanding an .apk install",
+      "language": "English",
+      "text": "Your SBI YONO account is blocked. Install SBI_KYC_Update.apk to reactivate immediately.",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "digital-arrest",
+      "why": "Police/Courier 'digital arrest' intimidation",
+      "language": "English",
+      "text": "Mumbai Crime Branch: A FedEx parcel with your Aadhaar has illegal drugs. Join video call now or face Digital Arrest.",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "real-bank-alert",
+      "why": "Genuine informational transaction alert must NOT be flagged as a scam",
+      "language": "English",
+      "text": "Rs. 450.00 debited from A/c XX1234 via UPI to ZOMATO on 21-11-26. Not you? Call 1800-202-6161.",
+      "expected": "LIKELY_SAFE"
+    },
+    {
+      "id": "lottery-fee",
+      "why": "Prize-fee advance-fee fraud",
+      "language": "English",
+      "text": "Congratulations! You have WON Rs 25,00,000 in Maharashtra State Lottery. Pay Rs 2,000 processing fee to claim your prize. Send to UPI fastpay4u@ybl today.",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "otp-sharing",
+      "why": "Direct OTP harvesting attempt",
+      "language": "English",
+      "text": "Your OTP is 482196. Share it with our executive to complete your KYC and receive Rs 5000 cashback.",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "kyc-phishing-link",
+      "why": "Fake KYC link — should be CAUTION (verify first), not panic",
+      "language": "English",
+      "text": "Dear SBI customer, your KYC has expired. Update now at sbi-kyc-update.xyz otherwise your account will be blocked.",
+      "expected": "CAUTION"
+    },
+    {
+      "id": "job-offer",
+      "why": "Too-good-to-be-true part-time earning offer",
+      "language": "English",
+      "text": "Work from home! Earn Rs 3000 daily doing simple tasks. Registration Rs 499 only. WhatsApp 9812345678 now.",
+      "expected": "CAUTION"
+    },
+    {
+      "id": "delivery-update",
+      "why": "Routine delivery notification",
+      "language": "English",
+      "text": "Your Flipkart order #402317 has been shipped and will arrive on 24-11-26. Track: fkrt.in/abc12",
+      "expected": "LIKELY_SAFE"
+    },
+    {
+      "id": "hindi-electricity",
+      "why": "Same utility scam in Hindi — must answer in Hindi (Devanagari)",
+      "language": "Hindi",
+      "text": "बिजली आपूर्ति आज रात 9:30 बजे काट दी जाएगी। तुरंत अधिकारी 9876543210 पर कॉल करें।",
+      "expected": "HIGH_RISK",
+      "mustContainDevanagari": true
+    },
+    {
+      "id": "hinglish-kyc",
+      "why": "Code-mixed message common among real users",
+      "language": "Hinglish",
+      "text": "Aapka bank account temporary block ho gaya hai. KYC update karne ke liye link click karo: tinyurl.com/sbi-up",
+      "expected": "CAUTION"
+    },
+    {
+      "id": "redaction-otp-account",
+      "why": "Family alert summary must leak zero OTP/PIN/account numbers",
+      "language": "English",
+      "text": "URGENT: OTP 9034. Your HDFC account 50100234567890 will be frozen in 1 hour. Call officer 9876501234 and share PIN 5521.",
+      "expected": "HIGH_RISK",
+      "mustNotInclude": ["9034", "50100234567890", "9876501234", "5521"]
+    }
+  ]
+}
