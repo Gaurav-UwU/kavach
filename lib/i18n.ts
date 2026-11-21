@@ -47,6 +47,13 @@ export interface Strings {
 
   errorGeneric: string;
   onboardConfirm: string;
+  changeLanguage: string;
+  menuAsk: string;
+  menuTip: string;
+  guardSetupAsk: (name: string, relation: string, phone: string) => string;
+  guardKeep: (name: string, relation: string) => string;
+  guardKeepConfirm: (name: string, relation: string) => string;
+  guardUpdatedConfirm: (name: string, relation: string, phone: string) => string;
   imgTooBig: string;
   imgTypeBad: string;
   removeAttachment: string;
@@ -101,6 +108,15 @@ export const STRINGS: Record<Language, Strings> = {
     errorGeneric: "Sorry, Kavach could not check this right now. Please try again.",
     onboardConfirm:
       "Done! We'll chat in English from now on. 🛡️\nForward any suspicious message — or tap a sample below — and I'll check it for you.",
+    changeLanguage: "Change language",
+    menuAsk: "What would you like to change?",
+    menuTip: "💡 You can change the language or your Family Guard anytime — just type menu.",
+    guardSetupAsk: (n, r, p) =>
+      `🛡️ One last step — your Family Guard is the person Kavach alerts on WhatsApp when a scam is detected. Right now that's ${n} (${r}), +91 ${p}.`,
+    guardKeep: (n, r) => `✅ Keep ${n} (${r})`,
+    guardKeepConfirm: (n, r) => `Done — alerts will go to ${n} (${r}) on WhatsApp. 🛡️`,
+    guardUpdatedConfirm: (n, r, p) =>
+      `Family Guard updated — alerts will now go to ${n} (${r}), +91 ${p}. 🛡️`,
     imgTooBig: "Image must be under 4 MB",
     imgTypeBad: "Only PNG, JPG or WebP images are supported",
     removeAttachment: "Remove attachment",
@@ -158,6 +174,15 @@ export const STRINGS: Record<Language, Strings> = {
     errorGeneric: "माफ़ करें, कवच अभी यह जाँच नहीं कर पाया। कृपया फिर कोशिश करें।",
     onboardConfirm:
       "हो गया! अब हम हिंदी में बात करेंगे। 🛡️\nकोई भी संदिग्ध संदेश भेजें — या नीचे नमूना आज़माएँ — मैं जाँच कर दूँगा।",
+    changeLanguage: "भाषा बदलें",
+    menuAsk: "आप क्या बदलना चाहेंगे?",
+    menuTip: "💡 भाषा या फैमिली गार्ड कभी भी बदलें — बस menu टाइप करें।",
+    guardSetupAsk: (n, r, p) =>
+      `🛡️ एक आख़िरी कदम — फैमिली गार्ड वह व्यक्ति है जिसे कवच किसी घोटाले पर WhatsApp अलर्ट भेजता है। अभी वह है ${n} (${r}), +91 ${p}।`,
+    guardKeep: (n, r) => `✅ ${n} (${r}) को ही रखें`,
+    guardKeepConfirm: (n, r) => `हो गया — अलर्ट अब ${n} (${r}) को WhatsApp पर जाएँगे। 🛡️`,
+    guardUpdatedConfirm: (n, r, p) =>
+      `फैमिली गार्ड अपडेट — अलर्ट अब ${n} (${r}), +91 ${p} को जाएँगे। 🛡️`,
     imgTooBig: "तस्वीर 4 MB से छोटी होनी चाहिए",
     imgTypeBad: "सिर्फ़ PNG, JPG या WebP तस्वीरें चलेंगी",
     removeAttachment: "तस्वीर हटाएँ",
@@ -215,6 +240,15 @@ export const STRINGS: Record<Language, Strings> = {
     errorGeneric: "क्षमस्व, कवच आत्ता हे तपासू शकले नाही. कृपया पुन्हा प्रयत्न करा.",
     onboardConfirm:
       "झाले! आता आपण मराठीत बोलू. 🛡️\nकोणताही संशयास्पद संदेश पाठवा — किंवा खालील नमुना पाहा — मी तपासतो.",
+    changeLanguage: "भाषा बदला",
+    menuAsk: "तुम्ही काय बदलू इच्छिता?",
+    menuTip: "💡 भाषा किंवा फॅमिली गार्ड कधीही बदला — फक्त menu टाइप करा.",
+    guardSetupAsk: (n, r, p) =>
+      `🛡️ शेवटचे एक — फॅमिली गार्ड म्हणजे फसवणूक आढळल्यास कवच WhatsApp वर अलर्ट पाठवणारी व्यक्ती. सध्या ती ${n} (${r}), +91 ${p} आहे.`,
+    guardKeep: (n, r) => `✅ ${n} (${r}) यांनाच ठेवा`,
+    guardKeepConfirm: (n, r) => `झाले — अलर्ट आता ${n} (${r}) यांना WhatsApp वर जाणार आहेत. 🛡️`,
+    guardUpdatedConfirm: (n, r, p) =>
+      `फॅमिली गार्ड अपडेट झाले — अलर्ट आता ${n} (${r}), +91 ${p} यांना जाणार आहेत. 🛡️`,
     imgTooBig: "प्रतिमा 4 MB पेक्षा लहान असावी",
     imgTypeBad: "फक्त PNG, JPG किंवा WebP प्रतिमा चालतील",
     removeAttachment: "प्रतिमा काढा",
@@ -272,6 +306,15 @@ export const STRINGS: Record<Language, Strings> = {
     errorGeneric: "Maaf karo, Kavach abhi ye check nahi kar paya. Phir se try karo.",
     onboardConfirm:
       "Ho gaya! Ab hum Hinglish mein baat karenge. 🛡️\nKoi bhi suspicious message bhejo — ya neeche sample try karo — main check kar dunga.",
+    changeLanguage: "Language badlo",
+    menuAsk: "Aap kya badalna chahenge?",
+    menuTip: "💡 Language ya Family Guard kabhi bhi badlo — bas menu type karo.",
+    guardSetupAsk: (n, r, p) =>
+      `🛡️ Ek last step — Family Guard wo insaan hai jise Kavach scam milne par WhatsApp alert bhejta hai. Abhi wo ${n} (${r}), +91 ${p} hai.`,
+    guardKeep: (n, r) => `✅ ${n} (${r}) ko hi rakho`,
+    guardKeepConfirm: (n, r) => `Ho gaya — alerts ab ${n} (${r}) ko WhatsApp pe jayenge. 🛡️`,
+    guardUpdatedConfirm: (n, r, p) =>
+      `Family Guard update — alerts ab ${n} (${r}), +91 ${p} ko jayenge. 🛡️`,
     imgTooBig: "Image 4 MB se chhoti honi chahiye",
     imgTypeBad: "Sirf PNG, JPG ya WebP images chalengi",
     removeAttachment: "Image hatao",

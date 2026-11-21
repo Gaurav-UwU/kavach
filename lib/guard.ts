@@ -62,6 +62,15 @@ export function clearAllSettings(): void {
   window.localStorage.removeItem(STORAGE_KEY);
 }
 
+/** True when the guard is still the untouched demo default (setup never done). */
+export function isDefaultGuard(contact: GuardContact): boolean {
+  return (
+    contact.name === DEFAULT_GUARD.name &&
+    contact.relation === DEFAULT_GUARD.relation &&
+    contact.phone === DEFAULT_GUARD.phone
+  );
+}
+
 /**
  * Accepts 10-digit numbers, optionally prefixed with +91 / 0 / spaces / dashes.
  * Returns just the 10 digits, or null if invalid.

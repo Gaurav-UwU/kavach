@@ -78,6 +78,7 @@ export default function FamilyGuardModal({ open, language, guard, onSave, onClos
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
+              aria-label={t.fieldLabel.name}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[16px] text-gray-900 focus:border-[#25D366] focus:outline-none focus:ring-2 focus:ring-[#25D366]/40"
             />
           </label>
@@ -88,6 +89,7 @@ export default function FamilyGuardModal({ open, language, guard, onSave, onClos
               value={relation}
               list="kavach-relations"
               onChange={(e) => setRelation(e.target.value)}
+              aria-label={t.fieldLabel.relation}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-[16px] text-gray-900 focus:border-[#25D366] focus:outline-none focus:ring-2 focus:ring-[#25D366]/40"
             />
             <datalist id="kavach-relations">
@@ -103,6 +105,7 @@ export default function FamilyGuardModal({ open, language, guard, onSave, onClos
               value={phone}
               inputMode="numeric"
               autoComplete="tel-national"
+              aria-label={t.fieldLabel.phone}
               onChange={(e) => {
                 setPhone(e.target.value);
                 setPhoneError(false);
