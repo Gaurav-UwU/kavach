@@ -117,6 +117,27 @@
       "expected": "CAUTION"
     },
     {
+      "id": "vision-fake-upi-qr",
+      "why": "Vision: 'scan the QR and enter your UPI PIN to receive' scam inside a chat screenshot",
+      "language": "English",
+      "image": "fixtures/fake_upi_qr.png",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "vision-apk-forward",
+      "why": "Vision: .apk install demand inside a WhatsApp chat screenshot",
+      "language": "English",
+      "image": "fixtures/apk_forward.png",
+      "expected": "HIGH_RISK"
+    },
+    {
+      "id": "vision-genuine-bank-sms",
+      "why": "Vision: genuine bank transaction alert must not be flagged",
+      "language": "English",
+      "image": "fixtures/genuine_bank_sms.png",
+      "expected": "LIKELY_SAFE"
+    },
+    {
       "id": "redaction-otp-account",
       "why": "Family alert summary must leak zero OTP/PIN/account numbers",
       "language": "English",

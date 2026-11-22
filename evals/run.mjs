@@ -19,7 +19,6 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-
 const BASE_URL = process.env.EVAL_BASE_URL ?? "http://localhost:3000";
 
 /** Fail-safe asymmetric tier rule (see header comment). */
@@ -56,12 +55,21 @@ function findLeaks(summary) {
 
 async function runCase(baseUrl, kase) {
   const failures = [];
+  let skipped = false;
+
+  // Vision cases: attach the fixture image as a base64 data URL.
+  let imageBase64 = null;
+  if (kase.image) {
+    const bytes = readFileSync(join(here, kase.image));
+    imageBase64 = "data:image/png;base64," + bytes.toString("base64");
+  }
+
   let response;
   try {
     response = await fetch(`${baseUrl}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: kase.text, language: kase.language }),
+      body: JSON.stringify({ text: kase.text ?? "", imageBase64, language: kase.language }),
     });
   } catch (error) {
     return { ok: false, failures: [`request failed: ${error.message}`], engine: "?" };
@@ -79,9 +87,18 @@ async function runCase(baseUrl, kase) {
     return { ok: false, failures: ["response was not JSON"], engine };
   }
 
+  // Vision cases need an AI engine that can read images. When only the offline
+  // rules engine is available it cannot see the screenshot, so the tier check
+  // is skipped rather than failed (shape and redaction checks still run).
+  const visionUnavailable = Boolean(kase.image) && engine === "heuristic";
+
   // 1. Verdict tier (fail-safe asymmetric rule)
   if (!verdictPasses(body.verdict, kase.expected, kase.adjacentAllowed)) {
-    failures.push(`verdict: expected ${kase.expected}, got ${body.verdict}`);
+    if (visionUnavailable) {
+      skipped = true;
+    } else {
+      failures.push(`verdict: expected ${kase.expected}, got ${body.verdict}`);
+    }
   }
 
   // 2. Shape of the reply
@@ -109,26 +126,29 @@ async function runCase(baseUrl, kase) {
   }
 
   // 4. Language compliance
-  if (kase.mustContainDevanagari) {
+  if (kase.mustContainDevanagari && !skipped) {
     const sample = [body.scamType, ...(body.reasons ?? []), body.nextAction].join(" ");
     if (!/[\u0900-\u097F]/.test(sample)) failures.push("expected Devanagari output for Hindi case");
   }
 
-  return { ok: failures.length === 0, failures, engine, body };
+  return { ok: failures.length === 0, failures, engine, body, skipped };
 }
 
 const results = [];
 for (const kase of cases) {
   const result = await runCase(BASE_URL, kase);
   results.push({ kase, result });
-  const icon = result.ok ? "✅" : "❌";
-  console.log(`${icon} ${kase.id.padEnd(24)} [${kase.expected}] got: ${result.body?.verdict ?? "ERR"} (engine: ${result.engine})`);
+  const icon = result.ok ? (result.skipped ? "⏭ " : "✅") : "❌";
+  const note = result.skipped ? " [SKIPPED: vision unavailable on heuristic fallback]" : "";
+  console.log(`${icon} ${kase.id.padEnd(24)} [${kase.expected}] got: ${result.body?.verdict ?? "ERR"} (engine: ${result.engine})${note}`);
   for (const failure of result.failures) console.log(`     └─ ${failure}`);
 }
 
-const passed = results.filter((r) => r.result.ok).length;
-console.log(`\n${passed}/${results.length} eval cases passed against ${BASE_URL}`);
-if (passed !== results.length) {
+const passed = results.filter((r) => r.result.ok && !r.result.skipped).length;
+const skippedCount = results.filter((r) => r.result.skipped).length;
+const failed = results.length - passed - skippedCount;
+console.log(`\n${passed}/${results.length} eval cases passed, ${skippedCount} vision case(s) skipped against ${BASE_URL}`);
+if (failed > 0) {
   console.log("Some evals FAILED. See details above.");
   process.exit(1);
 }
