@@ -6,19 +6,44 @@ Per the case-study submission requirements, this documents the prompts I used to
 
 The full product spec, handed to the agent verbatim (condensed here; the complete text is in the submission):
 
-> **HANDOFF.md: Kavach (WhatsApp-Native Scam Checker for Indian Parents)**
+> **HANDOFF.md: Kavach, a WhatsApp-native scam checker for Indian parents**
 >
-> Build a mobile-first web prototype that simulates a WhatsApp-native scam checker. Users forward/paste suspicious SMS or WhatsApp messages (or upload a screenshot) and receive a calm, jargon-free verdict (**High-Risk Scam**, **Caution**, or **Likely Safe**) in English, Hindi, or Hinglish, with audio playback and a one-tap **Family Guardian Alert**.
+> Build a mobile-first web prototype that simulates a WhatsApp-native scam checker. Users forward or paste a suspicious SMS or WhatsApp message (or upload a screenshot) and receive a calm, jargon-free verdict (**High-Risk Scam**, **Caution**, or **Likely Safe**) in English, Hindi, or Hinglish, with audio playback and a one-tap **Family Guardian Alert**.
 >
-> Tech: Next.js (App Router, TypeScript), Tailwind CSS, Vercel AI SDK (`generateObject` + zod), browser `speechSynthesis`, deploy on Vercel.
+> **Tech**
 >
-> UI: WhatsApp-style layout, `#075E54` header with verified badge and Family Guard 🛡️ settings, language pills, `#ECE5DD` chat canvas, `#DCF8C6` user bubbles, white Kavach replies with senior-friendly 16–18px text, 4 quick-test chips (⚡ Electricity Bill Cut / 🏦 SBI KYC (.apk) / 🚨 Digital Arrest / ✅ Real Bank Alert), paperclip screenshot upload (max 4MB, base64), green send button.
+> - Next.js (App Router, TypeScript), Tailwind CSS
+> - Vercel AI SDK (`generateObject` + zod)
+> - Browser `speechSynthesis`
+> - Deploy on Vercel
 >
-> Reply format: verdict pill → 2–3 plain-language "Why?" bullets → 1-line "What to do now" → action row (🔊 Listen via `speechSynthesis` en-IN/hi-IN; 📲 Send Alert via `https://wa.me/91<phone>?text=<alert>`) on HIGH_RISK/CAUTION → Auto-Alert banner on HIGH_RISK when Auto-Alert is ON, opening a modal with the exact redacted message.
+> **UI (WhatsApp-style)**
 >
-> Family Guard settings: Name `Aarav`, Relation `Son`, Phone `9876543210`, Auto-Alert ON, persisted in `localStorage`.
+> - Header: `#075E54` with verified badge and Family Guard 🛡️ settings
+> - Language pills; `#ECE5DD` chat canvas; `#DCF8C6` user bubbles
+> - White Kavach replies with senior-friendly 16–18px text
+> - 4 quick-test chips: ⚡ Electricity Bill Cut / 🏦 SBI KYC (.apk) / 🚨 Digital Arrest / ✅ Real Bank Alert
+> - Paperclip screenshot upload (max 4MB, base64); green send button
 >
-> API: `POST /api/analyze` with `{ text?, imageBase64?, language }`, `export const maxDuration = 30`. Include Chakshu (Sanchar Saathi) guidance for suspicious messages and 1930 for transferred money. Auto-redact 4–6 digit OTPs and account/card numbers from every family alert summary.
+> **Reply format**
+>
+> - Verdict pill
+> - 2–3 plain-language "Why?" bullets
+> - 1-line "What to do now"
+> - Action row on HIGH_RISK/CAUTION: 🔊 Listen via `speechSynthesis` (en-IN/hi-IN); 📲 Send Alert via `https://wa.me/91<phone>?text=<alert>`
+> - Auto-Alert banner on HIGH_RISK when Auto-Alert is ON, opening a modal with the exact redacted message
+>
+> **Family Guard settings**
+>
+> - Name `Aarav` · Relation `Son` · Phone `9876543210` · Auto-Alert ON
+> - Persisted in `localStorage`
+>
+> **API**
+>
+> - `POST /api/analyze` with `{ text?, imageBase64?, language }`
+> - `export const maxDuration = 30`
+> - Chakshu (Sanchar Saathi) guidance for suspicious messages; 1930 for transferred money
+> - Auto-redact 4–6 digit OTPs and account/card numbers from every family alert summary
 
 ## Prompt 2: Locking the API response contract
 
@@ -67,6 +92,7 @@ All later work happened through follow-up instructions in the same session; cond
 | 11 | "Add more sample forward messages" | Chip row grew from 4 to 11, covering all three tiers, with texts from the research dossier |
 | 12 | Groq API key: "set it up for the prototype and deploy" | Groq wired as an engine; structured outputs fixed verdict compliance; deployed to Vercel; deployment protection turned off so judges can open the link |
 | 13 | Gemini API key: "use Gemini as primary, Groq as fallback" | Engine chain flipped to Gemini, then Groq, then rules, with true failover; screenshot analysis re-enabled through Gemini vision; the bank-alert false positive fixed in the prompt |
+| 14 | "add these to evals too" (the golden-screenshot idea: a fake UPI QR, an .apk forward, a genuine bank SMS) | Three vision cases with rendered fixtures and a runner skip rule; the suite grew from 17 to 20 |
 
 ## Addendum: system prompt v2 (design interview + Reddit research)
 
@@ -105,4 +131,4 @@ I then asked the agent to research scam types using sources like Reddit, and to 
 - Agent 1, community reports: 18 searches across r/india, r/IsThisAScamIndia, r/LegalAdviceIndia, r/Scams, r/bangalore, and r/UPI, plus fact-checker sites. It collected verbatim scam texts posted by victims: the Microsoft-documented PAN-KYC APK template, the Kotak-quoted electricity SMS, the Vishvas News KBC poster text, OLX QR-code victim transcripts, a Rs 95,000 Telegram task story, and loan-app blackmail quotes.
 - Agent 2, official sources: the Chakshu portal's 11 report categories, copied from sancharsaathi.gov.in; RBI's BE(A)WARE fraud typologies; DoT and I4C advisory PDFs ("There is no concept of Digital Arrest under any Indian Laws"; "Your UPI PIN is only for SENDING money"); TRAI PR 55/2024; and I4C loss statistics (Rs 22,849 crore lost in 2024; investment scams were 77% of 2025 losses).
 
-The research set the HIGH_RISK and CAUTION enumeration (16 families, including trading groups, the "Hi Mummy" hijack, QR collects, sextortion, wedding-invite APKs, e-challan, LPG KYC, and IT refunds), supplied the technique-teaching lines, added three eval cases (injection, the Hi-Mummy hijack, and a QR collect; the suite grew from 13 to 16), and was committed as the dossier at docs/scam-typologies-india-2023-2026.md. Final state: 17/17 evals passing in production on the Gemini, then Groq, then rules-engine chain.
+The research set the HIGH_RISK and CAUTION enumeration (16 families, including trading groups, the "Hi Mummy" hijack, QR collects, sextortion, wedding-invite APKs, e-challan, LPG KYC, and IT refunds), supplied the technique-teaching lines, added three eval cases (injection, the Hi-Mummy hijack, and a QR collect; the suite grew from 13 to 16), and was committed as the dossier at docs/scam-typologies-india-2023-2026.md. At that point the suite stood at 17 cases, all passing in production on the Gemini, then Groq, then rules-engine chain. Prompt 14 later grew it to 20 with the vision fixtures.

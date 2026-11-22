@@ -46,7 +46,7 @@ npm run eval                       # against localhost:3000
 EVAL_BASE_URL=https://your-app.vercel.app npm run eval
 ```
 
-12 cases across English/Hindi/Hinglish covering the four sample chips, OTP harvesting, lottery fraud, KYC phishing, job scams, delivery noise — plus redaction-leak assertions on every `familyAlertSummary`.
+20 cases across English/Hindi/Marathi/Hinglish (17 text + 3 vision cases that attach rendered screenshot fixtures) covering the sample chips, OTP harvesting, lottery fraud, KYC phishing, job scams, delivery noise, prompt injection — plus redaction-leak assertions on every `familyAlertSummary`.
 
 ## Deploy to Vercel
 
