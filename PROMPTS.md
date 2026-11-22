@@ -1,5 +1,3 @@
-# PROMPTS.md: prompts used to create Kavach (assignment artifact #2)
-
 Per the case-study submission requirements, this documents the prompts I used to build the tool with an AI coding agent (OpenCode). The app lives in the [kavach/](./kavach) folder.
 
 ---

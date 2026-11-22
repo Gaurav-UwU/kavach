@@ -1,5 +1,3 @@
-# Evals: how Kavach was tested
-
 Kavach's verdict engine runs against a 17-case eval suite. The suite hits the live API (`POST /api/analyze`), the same endpoint the app uses. It has no dependencies beyond Node, so anyone can run it with one command:
 
 ```bash
